@@ -428,15 +428,15 @@ definitions:
     type: "object"
     required:
     - "Dates"
-    - "Link"
     - "Snippet"
     - "Title"
     - "Type"
+    - "URL"
     properties:
       Title:
         type: "string"
         description: "Title of Search result"
-      Link:
+      URL:
         type: "string"
         description: "Direct link to access this result's endpoint"
       Snippet:
@@ -466,7 +466,27 @@ definitions:
       Rating:
         type: "number"
         description: "Average rating of this result (out of 5)"
+      Mime-type:
+        type: "string"
+        description: "Default mime-type of this result (only for type: ResourceBundle)"
     description: "An object encapsulating a result for a specific search."
+  Clustered Result:
+    type: "object"
+    required:
+    - "leading_result"
+    properties:
+      leading_result:
+        $ref: "#/definitions/Search Result"
+      follower_result:
+        type: "array"
+        description: "The \"follower\" search result for this cluster"
+        items:
+          $ref: "#/definitions/Search Result"
+      highlighted_snippet:
+        type: "string"
+        description: "Snippet of this \"search cluster\""
+    description: "On object encapsulating a \"clustered search result\" - a \"leading\
+      \ result\", \"follower results\", and the highlighted snipped for this result-group."
   Search Results:
     type: "object"
     required:
@@ -477,7 +497,7 @@ definitions:
         type: "array"
         description: "Results for this search"
         items:
-          $ref: "#/definitions/Search Result"
+          $ref: "#/definitions/Clustered Result"
       Pagination:
         $ref: "#/definitions/paginationData"
   Bundle:
