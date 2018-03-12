@@ -561,63 +561,6 @@ definitions:
         type: "string"
         description: "Returns a link to the homepage topic of the bundle if set."
     description: "Represents a content bundle in the system."
-  Bundle Update Request:
-    type: "object"
-    properties:
-      labels:
-        type: "array"
-        description: "Array of labels to filter bundles"
-        items:
-          type: "integer"
-      field_filters:
-        type: "object"
-        properties:
-          type:
-            type: "string"
-            enum:
-            - "internal"
-            - "meta"
-          field:
-            type: "string"
-            description: "Field name"
-          start:
-            type: "string"
-            description: "Start value"
-          end:
-            type: "string"
-            description: "end value"
-      sort:
-        type: "object"
-        description: "TBD - list of field names, in order of when they were clicked\
-          \ with most recent first, with all duplicates removed. Each sort entry is\
-          \ in the following format:"
-        properties:
-          type:
-            type: "string"
-            enum:
-            - "internal"
-            - "meta"
-          field:
-            type: "string"
-            description: "field name"
-          dir:
-            type: "string"
-            enum:
-            - "asc"
-            - "desc"
-      items_per_page:
-        type: "integer"
-      page:
-        type: "integer"
-    description: "Object used to list bundles\nSee: SSH-1217\n\nNote regarding `field_filters`:\
-      \ \n> Valid values for field name:\n> + If \"type\" = \"internal\" :\n>   +\
-      \ \"created\" - the manual created timestamp\n>   + \"revised\" - the manual\
-      \ revised timestamp\n>   + \"added\" - the manual added on (last uploaded) timestamp\n\
-      > + If \"type\" = \"meta\" :\n>   + The name of a metadata field from bundle_info.xml.\n\
-      \nNote regarding `sort`:\n> + Valid values for field name: as for field_filter\
-      \ above.\n> + The \"dir field determines whether sorting for this field is ascending\
-      \ or descending.\n> + The \"dir\" field is optional. If omitted, sorting is\
-      \ ascending."
   Topic:
     type: "object"
     required:
