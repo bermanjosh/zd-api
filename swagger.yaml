@@ -75,7 +75,7 @@ paths:
         in: "query"
         required: false
         type: "number"
-        description: "Filter search by label (num)"
+        description: "[Deprecated, replaced by labelkey] Filter search by label (num)"
       - name: "slug"
         in: "query"
         required: false
@@ -88,7 +88,7 @@ paths:
             $ref: "#/definitions/Search Results"
   /bundle/:
     get:
-      summary: "load the list of bundles"
+      summary: "load a list of bundles"
       parameters:
       - name: "results_per_page"
         in: "query"
@@ -106,15 +106,18 @@ paths:
         in: "query"
         required: false
         type: "string"
-        description: "Which \"name\" field to filter by"
+        description: "The name filter allows you to filter the returned list of bundles\
+          \ based on a certain string match against the following field:"
         enum:
         - "Title"
         - "Name"
+        x-example: "Title"
       - name: "name_filter.value"
         in: "query"
         required: false
         type: "string"
-        description: "The value to filter the \"name\" field by."
+        description: "The value to filter the \"name\" field by"
+        x-example: "Acme Installation"
       - name: "type_filter"
         in: "query"
         required: false
@@ -123,48 +126,76 @@ paths:
         enum:
         - "HTMLBundle"
         - "ResourceBundle"
+        x-example: "HTMLBundle"
       - name: "metadata_filter.field"
         in: "query"
         required: false
         type: "string"
-        description: "The name of a metadata field to filter by"
+        description: "The metadata filter allows you to filter the returned list of\
+          \ bundles based on a hit against this metadata name:"
+        x-example: "Author"
       - name: "metadata_filter.value"
         in: "query"
         required: false
         type: "string"
-        description: "The value to filter the “date_filter.type” field by\n\nThe value\
-          \ to filter the “date_filter.type” field by\n\nThe value to filter the “\
-          metadata_filter.field” field by"
+        description: "The value to filter the “metadata_filter.field” field by"
+        x-example: "Jane Austin"
+      - name: "labelkey"
+        in: "query"
+        required: false
+        type: "string"
+        description: "The label filter allows you to filter the returned list of bundles\
+          \ based on your taxonomy tags. You can include one or more valid subjecthead\
+          \ key or subjectdef key from your taxonomy."
+        x-example: "labelkey=prod-rtr-industrial"
+      - name: "labels"
+        in: "query"
+        required: false
+        type: "string"
+        description: "[Deprecated, replaced by labelkey] The labels filter allows\
+          \ you to filter the returned list of bundles based on database IDs of a\
+          \ valid subjecthead key or subjectdef key from your taxonomy."
+        x-example: "labels=4"
       - name: "date_filter.type"
         in: "query"
         required: false
         type: "string"
-        description: "Which “date” field to filter by"
+        description: "The date filter allows you to filter the returned list of bundles\
+          \ based on the following date type:\n\nCreated: The date which the publication\
+          \ was created on based on the CMS/authoring tool records (if specified).\n\
+          \nLast revised: The date which the publication was last revised based on\
+          \ the CMS/authoring tool records (if specified).\n\nLast uploaded: The UTC\
+          \ dateTime which the bundle was last uploaded"
         enum:
         - "created"
-        - "revised"
-        - "added"
+        - "last_revised"
+        - "last_uploaded"
+        x-example: "created"
       - name: "date_filter.value"
         in: "query"
         required: false
         type: "string"
         format: "date-time"
         description: "The value to filter the “date_filter.type” field by"
+        x-example: "2018-03-27"
       - name: "sort.field"
         in: "query"
         required: false
         type: "string"
-        description: "What field to sort by"
+        description: "Sort the returned list of bundles by"
+        default: "last_uploaded"
         enum:
         - "created"
-        - "revised"
-        - "added"
+        - "last_revised"
+        - "last_uploaded"
+        - "title"
+        x-example: "title"
       - name: "sort.value"
         in: "query"
         required: false
         type: "string"
         description: "What order to sort by"
-        default: "asc"
+        default: "dec"
         enum:
         - "asc"
         - "dec"
@@ -503,9 +534,7 @@ definitions:
   Bundle:
     type: "object"
     required:
-    - "Content"
-    - "hidden"
-    - "last_uploaded"
+    - "dates"
     - "name"
     - "title"
     - "type"
@@ -514,53 +543,79 @@ definitions:
         type: "string"
         description: "The bundle name is a unique identifier that is used as part\
           \ of the url (/bundle/{name})"
+        example: "AISuite_230_ConceptsGuide_allOS_en_HTML5"
       title:
         type: "string"
-        description: "Human readable name"
+        description: "The bundle title is a human readable name presented to the viewer"
+        example: "AI Suite 2.3.0 Concepts Guide"
       type:
         type: "string"
+        description: "Defines the type of the returned bundle:\nHTMLBundle: Standard\
+          \ publication bundle converted to HTML5\nResourceBundle: Bundle consisting\
+          \ of various non-HTML file formats, e.g. PDF or Word."
         enum:
-        - "html"
-        - "resource"
-      ToC:
-        type: "string"
-        description: "Returns a link to the ToC of the bundle if exists."
-      Content:
-        type: "string"
-        description: "Returns a direct link to the content in this bundle."
-      time_created:
-        type: "string"
-        format: "date-time"
-        description: "Timestamp of when this bundle was last updated. This value is\
-          \ only valid if set by a CMS or an authoring tool integration."
-      last_updated:
-        type: "string"
-        format: "date-time"
-        description: "Timestamp of when this bundle was last updated. This value is\
-          \ only valid if set by a CMS or an authoring tool integration."
-      last_uploaded:
-        type: "string"
-        format: "date-time"
-        description: "Timestamp of when this bundle was last uploaded to the system"
-      hidden:
-        type: "boolean"
-        description: "Indicates if this bundle is only available for users with the\
-          \ permission to view hidden bundles"
-        default: false
+        - "HTMLBundle"
+        - "ResourceBundle"
+        example: "HTMLBundle"
+      dates:
+        $ref: "#/definitions/Dates"
       Attachments:
-        type: "boolean"
+        type: "object"
         description: "Returns a direct link to this bundle’s attachments if exist."
+        properties:
+          BundleAttachments:
+            type: "array"
+            description: "Array of individual attachments."
+            items:
+              $ref: "#/definitions/BundleAttachment"
+          AllAttachments:
+            type: "string"
+            description: "URL to download all attachments as a single Zip file"
+            example: "docs.zoominsoftware.io/bundle/publication_name/allattach"
       PreprocessedPDF:
         type: "string"
         description: "Download link to a pre-processed PDF version of this bundle\
           \ if exists."
       Metadata:
-        type: "string"
-        description: "Returns a direct link to this bundle's metadata if exist."
+        type: "array"
+        description: "Returns any metadata records specified for the bundle."
+        items:
+          type: "object"
+          properties:
+            key:
+              type: "string"
+              description: "Metadata key"
+              example: "Author"
+            value:
+              type: "string"
+              description: "Metadata value"
+              example: "Jane Austin"
+      labels:
+        type: "array"
+        description: "Tree of taxonomy objects which apply to this bundle."
+        items:
+          $ref: "#/definitions/Subject"
       Homepage:
         type: "string"
         description: "Returns a link to the homepage topic of the bundle if set."
+      canonical_bundle:
+        type: "string"
+        description: "Bundle name of the bundle set as being canonical to the current\
+          \ bundle."
+        example: "AISuite_250_ConceptsGuide_allOS_en_HTML5"
     description: "Represents a content bundle in the system."
+  BundleAttachment:
+    type: "object"
+    properties:
+      filename:
+        type: "string"
+        description: "The name of the attachment file"
+        example: "sample.jpg"
+      url:
+        type: "string"
+        description: "Attachment download url"
+        example: "docs.zoominsoftware.io/bundle/publication_name/attach/filename.jpg"
+    description: "Bundle Attachment is a file that can be attached to a bundle."
   Topic:
     type: "object"
     required:
