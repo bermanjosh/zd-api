@@ -171,13 +171,20 @@ paths:
         - "last_revised"
         - "last_uploaded"
         x-example: "created"
-      - name: "date_filter.value"
+      - name: "date_filter.startValue"
         in: "query"
         required: false
         type: "string"
         format: "date-time"
-        description: "The value to filter the “date_filter.type” field by"
+        description: "The start date you want the date filter to use"
         x-example: "2018-03-27"
+      - name: "date_filter.endValue"
+        in: "query"
+        required: false
+        type: "string"
+        format: "date-time"
+        description: "The end date you want the date filter to use"
+        x-example: "2018-03-29"
       - name: "sort.field"
         in: "query"
         required: false
