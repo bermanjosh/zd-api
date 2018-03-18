@@ -22,65 +22,107 @@ paths:
         in: "query"
         required: false
         type: "string"
-        description: "Text of query"
-      - name: "source"
+        description: "Text query you want to match against"
+      - name: "type"
         in: "query"
         required: false
         type: "string"
-        description: "Type of result"
+        description: "Filter results only to specific type of content."
         enum:
         - "Bundle"
         - "ContributedArticle"
         - "ContributedVideo"
+        - "all"
+        x-example: "type=bundle"
       - name: "rpp"
         in: "query"
         required: false
         type: "integer"
         description: "Results per page"
+        x-example: 25
       - name: "page"
         in: "query"
         required: false
         type: "integer"
-        description: "Page number"
-      - name: "sort"
-        in: "query"
-        required: false
-        type: "string"
-        description: "Sort-by"
-        enum:
-        - "updated-asc"
-        - "updated-dec"
-        - "created-asc"
-        - "created-dec"
-        - "views (reserved for future use)"
-        - "score"
-      - name: "field-start-date"
-        in: "query"
-        required: false
-        type: "string"
-        format: "date-time"
-        description: "Only include topics following this date"
-      - name: "field-end-date"
-        in: "query"
-        required: false
-        type: "string"
-        format: "date-time"
-        description: "Only include topics before this date"
+        description: "Number of the page to retrieve"
+        x-example: 1
       - name: "labelkey"
         in: "query"
         required: false
         type: "string"
-        description: "Filter search by label (keys)"
+        description: "The label filter allows you to filter the returned list of results\
+          \ based on your taxonomy tags. You can include one or more valid subjecthead\
+          \ key or subjectdef key from your taxonomy."
+        x-example: "labelkey=prod-rtr-industrial"
       - name: "labels"
         in: "query"
         required: false
         type: "number"
-        description: "[Deprecated, replaced by labelkey] Filter search by label (num)"
-      - name: "slug"
+        description: "[Deprecated, replaced by labelkey] The labels filter allows\
+          \ you to filter the returned list of results based on database IDs of a\
+          \ valid subjecthead key or subjectdef key from your taxonomy."
+        x-example: "labels=4"
+      - name: "bundle"
         in: "query"
         required: false
         type: "string"
-        description: "Filter to a specific publication name"
+        description: "Filter search results to show only to content from a specific\
+          \ bundle"
+        x-example: "bundle=AISuite_230_ConceptsGuide_allOS_en_HTML5"
+      - name: "date_filter.type"
+        in: "query"
+        required: false
+        type: "string"
+        description: "The date filter allows you to filter the returned list of results\
+          \ based on the following date type:\n\nCreated: The date which the content\
+          \ was created on based on the CMS/authoring tool records (if specified).\n\
+          \nLast revised: The date which the content was last revised based on the\
+          \ CMS/authoring tool records (if specified).\n\nLast uploaded: The UTC dateTime\
+          \ which the content was last uploaded"
+        default: "last_uploaded"
+        enum:
+        - "created"
+        - "last_revised"
+        - "last_uploaded"
+        x-example: "created"
+      - name: "date_filter.startValue"
+        in: "query"
+        required: false
+        type: "string"
+        format: "date-time"
+        description: "The start date you want the date filter to use"
+        x-example: "2018-03-27"
+      - name: "date_filter.endValue"
+        in: "query"
+        required: false
+        type: "string"
+        format: "date-time"
+        description: "The end date you want the date filter to use"
+        x-example: "2018-03-29"
+      - name: "sort.field"
+        in: "query"
+        required: true
+        type: "string"
+        description: "Sort the returned list of results by"
+        default: "score"
+        enum:
+        - "created"
+        - "last_revised"
+        - "last_uploaded"
+        - "title"
+        - "score"
+        - "views (reserved for future use)"
+        x-example: "last_revised"
+      - name: "sort.value"
+        in: "query"
+        required: true
+        type: "string"
+        description: "What order to sort by\n\nWhat order to sort by\n\nWhat order\
+          \ to sort by"
+        default: "dec"
+        enum:
+        - "asc"
+        - "dec"
       responses:
         200:
           description: "Status 200"
@@ -90,13 +132,13 @@ paths:
     get:
       summary: "load a list of bundles"
       parameters:
-      - name: "results_per_page"
+      - name: "rpp"
         in: "query"
         required: false
         type: "integer"
         description: "Number of bundles to return in each page"
         x-example: 25
-      - name: "page_number"
+      - name: "page"
         in: "query"
         required: false
         type: "integer"
@@ -465,48 +507,62 @@ definitions:
   Search Result:
     type: "object"
     required:
-    - "Dates"
-    - "Snippet"
-    - "Title"
-    - "Type"
-    - "URL"
+    - "dates"
+    - "snippet"
+    - "title"
+    - "type"
+    - "url"
     properties:
-      Title:
+      title:
         type: "string"
         description: "Title of Search result"
-      URL:
+        example: "Information Model"
+      url:
         type: "string"
         description: "Direct link to access this result's endpoint"
-      Snippet:
+      snippet:
         type: "string"
         description: "HTML snippet of search result"
-      Type:
+        example: "The Information Model defines the structured authoring environment\
+          \ used to create product documentation."
+      publication_title:
         type: "string"
-        description: "Type of entity of search result"
+        description: "Publication title for this result"
+        example: "Codec Installation Guide"
+      score:
+        type: "number"
+        description: "Search engine relevancy score (on a scale between 0 to 1)"
+        example: 0.877
+      type:
+        type: "string"
+        description: "Type of search result"
         enum:
-        - "HTMLBundle"
-        - "ResourceBundle"
-        - "ContributedArticle"
-        - "ContributedVideo"
-      Dates:
+        - "html_topic"
+        - "nonhtml_file"
+        - "contributed_article"
+        - "contributed_video"
+        example: "html_topic"
+      dates:
         $ref: "#/definitions/Dates"
-      Likes:
+      views:
         type: "integer"
-        description: "Number of likes of this result"
-      Labels:
+        description: "Number of this result was viewed"
+        example: 55
+      usefulness:
+        $ref: "#/definitions/Usefulness"
+      rating:
+        type: "number"
+        description: "Average rating of this result (on a scale of 1-5)"
+        example: 2.3
+      labels:
         type: "array"
-        description: "Tree of labels which apply to this result"
+        description: "Tree of taxonomy objects which apply to this bundle."
         items:
           $ref: "#/definitions/Subject"
-      Publication title:
+      mimetype:
         type: "string"
-        description: "Publication title of this result"
-      Rating:
-        type: "number"
-        description: "Average rating of this result (out of 5)"
-      Mime-type:
-        type: "string"
-        description: "Default mime-type of this result (only for type: ResourceBundle)"
+        description: "Default mimetype of this result (only for type: nonhtml_file)"
+        example: "application/pdf"
     description: "An object encapsulating a result for a specific search."
   Clustered Result:
     type: "object"
@@ -517,14 +573,17 @@ definitions:
         $ref: "#/definitions/Search Result"
       follower_result:
         type: "array"
-        description: "The \"follower\" search result for this cluster"
+        description: "One or more \"follower\" results which will appear alongside\
+          \ the leading result"
         items:
           $ref: "#/definitions/Search Result"
       highlighted_snippet:
         type: "string"
-        description: "Snippet of this \"search cluster\""
-    description: "On object encapsulating a \"clustered search result\" - a \"leading\
-      \ result\", \"follower results\", and the highlighted snipped for this result-group."
+        description: "HTML snippet of search result"
+        example: "The Information Model defines the structured authoring environment\
+          \ used to create product documentation."
+    description: "Search results with identical titles that exist across multiple\
+      \ bundles may be clustered together, based on the platform configuration."
   Search Results:
     type: "object"
     required:
@@ -538,6 +597,15 @@ definitions:
           $ref: "#/definitions/Clustered Result"
       Pagination:
         $ref: "#/definitions/paginationData"
+      did_you_mean:
+        type: "array"
+        description: "In case of no results, the platform may propose one or more\
+          \ alternative terms that are likely to yield better results, sorted by order\
+          \ of relevancy."
+        items:
+          type: "string"
+  enu:
+    type: "object"
   Bundle:
     type: "object"
     required:
@@ -672,6 +740,17 @@ definitions:
         items:
           $ref: "#/definitions/Subject"
     description: "An object representing a topic in a bundle."
+  Usefulness:
+    type: "object"
+    properties:
+      promoters:
+        type: "integer"
+        description: "number of users who marked this topic as helpful"
+        example: 503
+      detractors:
+        type: "integer"
+        description: "number of users who marked this topic as unhelpful"
+        example: 43
   Error:
     type: "object"
     required:
