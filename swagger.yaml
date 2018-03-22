@@ -123,6 +123,12 @@ paths:
         enum:
         - "asc"
         - "dec"
+      - name: "exact_facet_match"
+        in: "query"
+        required: false
+        type: "boolean"
+        description: "[Reserved for future implementation] Only return content which\
+          \ is *only* tagged with selected facets."
       responses:
         200:
           description: "Status 200"
@@ -248,6 +254,12 @@ paths:
         enum:
         - "asc"
         - "dec"
+      - name: "exact_facet_match"
+        in: "query"
+        required: false
+        type: "boolean"
+        description: "[Reserved for future implementation] Only return content which\
+          \ is *only* tagged with selected facets."
       responses:
         200:
           description: "Status 200"
