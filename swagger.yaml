@@ -29,9 +29,9 @@ paths:
         type: "string"
         description: "Filter results only to specific type of content."
         enum:
-        - "Bundle"
-        - "ContributedArticle"
-        - "ContributedVideo"
+        - "bundle"
+        - "contributedArticle"
+        - "contributedVideo"
         - "all"
         x-example: "type=bundle"
       - name: "rpp"
