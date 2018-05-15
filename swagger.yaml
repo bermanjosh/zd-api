@@ -309,25 +309,101 @@ paths:
     get:
       summary: "Get list of Users"
       parameters:
-      - name: "page_number"
-        in: "query"
-        required: false
-        type: "integer"
-        description: "Specifies the page number you want to retrieve. If not specified,\
-          \ the first page is returned."
-      - name: "results_per_page"
+      - name: "rpp"
         in: "query"
         required: true
         type: "integer"
         description: "Number of users to return in each page"
         x-example: 25
-      - name: "name_filter"
+      - name: "page"
+        in: "query"
+        required: false
+        type: "integer"
+        description: "Number of the page to retrieve\n\nNumber of the page to retrieve\n\
+          \nNumber of the page to retrieve\n\nNumber of the page to retrieve"
+        x-example: 1
+      - name: "name_filter.field"
         in: "query"
         required: false
         type: "string"
-        description: "Return only users whose email or name contains this string in\
-          \ a case insensitive manner."
-        x-example: "\"john.smith\""
+        description: "The name filter allows you to filter the returned list of bundles\
+          \ based on a certain string match against the following field:"
+        enum:
+        - "name"
+        - "email"
+        x-example: "email"
+      - name: "name_filter.value"
+        in: "query"
+        required: false
+        type: "string"
+        description: "The value to filter the “name” field by"
+        x-example: "John"
+      - name: "authentication_filter"
+        in: "query"
+        required: false
+        type: "string"
+        description: "The authentication filter allows you to filter users by the\
+          \ authentication provider they are using to login to Zoomin."
+        enum:
+        - "internal_authentication"
+        - "sso"
+        x-example: "internal_authentication"
+      - name: "active_filter"
+        in: "query"
+        required: false
+        type: "string"
+        description: "The active filter allows you to filter active users vs. deactivated\
+          \ users."
+        enum:
+        - "active"
+        - "inactive"
+        x-example: "active"
+      - name: "sort.field"
+        in: "query"
+        required: false
+        type: "string"
+        description: "Sort the returned list of users by"
+        enum:
+        - "name"
+        - "email"
+        x-example: "Name"
+      - name: "sort.value"
+        in: "query"
+        required: false
+        type: "string"
+        description: "What order to sort by"
+        enum:
+        - "asc"
+        - "dec"
+        x-example: "asc"
+      - name: "date_filter.type"
+        in: "query"
+        required: false
+        type: "string"
+        description: "The date filter allows you to filter the returned list of users\
+          \ based on their registration date or date of last login."
+        enum:
+        - "registered_on"
+        - "last_login"
+        x-example: "registered_on"
+      - name: "date_filter.startValue"
+        in: "query"
+        required: false
+        type: "string"
+        format: "date-time"
+        description: "The start date you want the date filter to use"
+        x-example: "2018-03-27"
+      - name: "date_filter.endValue"
+        in: "query"
+        required: false
+        type: "string"
+        format: "date-time"
+        description: "The end date you want the date filter to use"
+        x-example: "2018-03-29"
+      - name: "role_filter"
+        in: "query"
+        required: false
+        type: "string"
       responses:
         200:
           description: "Status 200"
@@ -369,14 +445,7 @@ paths:
         in: "body"
         required: true
         schema:
-          type: "object"
-          properties:
-            name:
-              type: "string"
-            email:
-              type: "string"
-            active:
-              type: "boolean"
+          $ref: "#/definitions/User"
       responses:
         200:
           description: "Status 200"
@@ -396,12 +465,6 @@ paths:
       required: true
       type: "string"
   /users/{userid}/roles/{roleid}:
-    put:
-      summary: "assign a role to a user"
-      parameters: []
-      responses:
-        200:
-          description: "Status 200"
     parameters:
     - name: "userid"
       in: "path"
@@ -411,6 +474,42 @@ paths:
       in: "path"
       required: true
       type: "string"
+  /admin/search_configuration/es_analyzer:
+    get:
+      summary: "Download"
+      description: "Download a copy of a currently installed analyzer.\n\nRequired\
+        \ permissions for this action: SearchConfiguration R/U"
+      parameters:
+      - name: "language"
+        in: "query"
+        required: false
+        type: "string"
+        description: "Specify a specific language code if you would like to obtain\
+          \ a language specific-analyzer. Otherwise, the analyzer for the default\
+          \ language (English) will be returned."
+        x-example: "dede"
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            $ref: "#/definitions/searchAnalyzer"
+      security:
+      - Zoomin Generated Keys: []
+    put:
+      summary: "Update"
+      description: "Replace an existing analyzer with a new one."
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/searchAnalyzer"
+      responses:
+        204:
+          description: "Status 204"
+      security:
+      - Zoomin Generated Keys: []
   /roles/:
     get:
       summary: "load the list of Roles"
@@ -515,6 +614,11 @@ paths:
       in: "path"
       required: true
       type: "string"
+securityDefinitions:
+  Zoomin Generated Keys:
+    type: "apiKey"
+    name: "timestamp"
+    in: "query"
 definitions:
   Search Result:
     type: "object"
@@ -616,8 +720,6 @@ definitions:
           \ of relevancy."
         items:
           type: "string"
-  enu:
-    type: "object"
   Bundle:
     type: "object"
     required:
@@ -646,24 +748,24 @@ definitions:
         example: "HTMLBundle"
       dates:
         $ref: "#/definitions/Dates"
-      Attachments:
+      attachments:
         type: "object"
         description: "Returns a direct link to this bundle’s attachments if exist."
         properties:
-          BundleAttachments:
+          bundle_attachments:
             type: "array"
             description: "Array of individual attachments."
             items:
               $ref: "#/definitions/BundleAttachment"
-          AllAttachments:
+          all_attachments:
             type: "string"
             description: "URL to download all attachments as a single Zip file"
             example: "docs.zoominsoftware.io/bundle/publication_name/allattach"
-      PreprocessedPDF:
+      preprocessed_PDF:
         type: "string"
         description: "Download link to a pre-processed PDF version of this bundle\
           \ if exists."
-      Metadata:
+      metadata:
         type: "array"
         description: "Returns any metadata records specified for the bundle."
         items:
@@ -682,7 +784,7 @@ definitions:
         description: "Tree of taxonomy objects which apply to this bundle."
         items:
           $ref: "#/definitions/Subject"
-      Homepage:
+      homepage:
         type: "string"
         description: "Returns a link to the homepage topic of the bundle if set."
       canonical_bundle:
@@ -693,6 +795,9 @@ definitions:
     description: "Represents a content bundle in the system."
   BundleAttachment:
     type: "object"
+    required:
+    - "filename"
+    - "url"
     properties:
       filename:
         type: "string"
@@ -763,6 +868,49 @@ definitions:
         type: "integer"
         description: "number of users who marked this topic as unhelpful"
         example: 43
+  User:
+    type: "object"
+    required:
+    - "active"
+    - "email"
+    - "id"
+    - "role_name"
+    properties:
+      id:
+        type: "number"
+        description: "User id"
+      email:
+        type: "string"
+        description: "The user email address"
+        example: "john.doe@acme.com"
+      name:
+        type: "string"
+        description: "The user full name"
+      auth_source:
+        type: "string"
+        description: "Defines which authentication source (iDP) was used to register\
+          \ this user"
+      active:
+        type: "boolean"
+        description: "Indicates if the user is active or disabled in the system."
+        default: true
+      registered_at:
+        type: "string"
+        format: "date-time"
+        description: "Indicates when the user was first registered in the system"
+      last_login_at:
+        type: "string"
+        format: "date-time"
+        description: "Indicates when the user last logged into the system"
+      role_name:
+        type: "string"
+        description: "Indicates the functional role assigned to the user"
+      content_role_names:
+        type: "array"
+        description: "Indicates the content roles assigned to the user"
+        items:
+          type: "string"
+    description: "Represents a single user in the system."
   Error:
     type: "object"
     required:
@@ -857,18 +1005,6 @@ definitions:
         items:
           $ref: "#/definitions/Subject"
     description: "Represents a single content role in the system."
-  searchAnalyzer:
-    type: "object"
-    properties:
-      last_updated:
-        type: "string"
-        format: "date-time"
-        description: "When the analyzer was last updated"
-      analyzer_file:
-        type: "string"
-        format: "binary"
-        description: "The elasticsearch analyzer file specified in the system"
-    description: "Represents the Elasticsearch analyzer used in the system."
   Watermark:
     type: "object"
     required:
@@ -1050,49 +1186,15 @@ definitions:
         format: "date-time"
         description: "Time this topic was updated"
     description: "Object to encapsulate dates for a topic"
-  User:
+  searchAnalyzer:
     type: "object"
-    required:
-    - "active"
-    - "email"
-    - "id"
-    - "role_name"
     properties:
-      id:
-        type: "number"
-        description: "User id"
-      email:
-        type: "string"
-        description: "The user email address"
-        example: "john.doe@acme.com"
-      name:
-        type: "string"
-        description: "The user full name"
-      auth_source:
-        type: "string"
-        description: "Defines which authentication source (iDP) was used to register\
-          \ this user"
-      active:
-        type: "boolean"
-        description: "Indicates if the user is active or disabled in the system."
-        default: true
-      registered_at:
-        type: "string"
-        format: "date-time"
-        description: "Indicates when the user was first registered in the system"
-      last_login_at:
-        type: "string"
-        format: "date-time"
-        description: "Indicates when the user last logged into the system"
-      role_name:
-        type: "string"
-        description: "Indicates the functional role assigned to the user"
-      content_role_names:
-        type: "array"
-        description: "Indicates the content roles assigned to the user"
-        items:
-          type: "string"
-    description: "Represents a single user in the system."
+      analyzer_json:
+        type: "object"
+        description: "The elasticsearch analyzer file specified in the system"
+      language:
+        $ref: "#/definitions/language"
+    description: "Represents the Elasticsearch analyzer used in the system."
   Role:
     type: "object"
     required:
