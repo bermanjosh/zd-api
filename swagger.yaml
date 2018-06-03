@@ -69,6 +69,12 @@ paths:
         description: "Filter search results to show only to content from a specific\
           \ bundle"
         x-example: "bundle=AISuite_230_ConceptsGuide_allOS_en_HTML5"
+      - name: "language"
+        in: "query"
+        required: false
+        type: "string"
+        description: "Filter only content marked with this language code"
+        x-example: "enus"
       - name: "date_filter.type"
         in: "query"
         required: false
@@ -286,6 +292,58 @@ paths:
       in: "path"
       required: true
       type: "string"
+  /bundle/{bundleid}/files:
+    get:
+      summary: "List all files in bundle"
+      parameters:
+      - name: "language"
+        in: "query"
+        required: false
+        type: "string"
+        description: "Serve list to the bundle marked with this language tag"
+        x-example: "enus"
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            type: "array"
+            items:
+              type: "string"
+          examples:
+            application/json: "List of URLs of the files in the bundle, consistent\
+              \ with the filelist.xml."
+      security:
+      - Zoomin Generated Keys: []
+    parameters:
+    - name: "bundleid"
+      in: "path"
+      required: true
+      type: "string"
+  /bundle/{bundleid}/toc:
+    get:
+      summary: "List ToC for bundle"
+      parameters:
+      - name: "language"
+        in: "query"
+        required: false
+        type: "string"
+        description: "Serve list to the bundle marked with this language tag"
+        x-example: "enus"
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/TocEntry"
+      security:
+      - Zoomin Generated Keys: []
+    parameters:
+    - name: "bundleid"
+      in: "path"
+      required: true
+      type: "string"
+  /bundle/bundleid/page: {}
   /bundle/{bundleid}/page/{navpath}:
     get:
       summary: "Access a topic"
@@ -664,8 +722,6 @@ definitions:
         type: "integer"
         description: "Number of this result was viewed"
         example: 55
-      usefulness:
-        $ref: "#/definitions/Usefulness"
       rating:
         type: "number"
         description: "Average rating of this result (on a scale of 1-5)"
@@ -675,6 +731,8 @@ definitions:
         description: "Tree of taxonomy objects which apply to this bundle."
         items:
           $ref: "#/definitions/Subject"
+      language:
+        $ref: "#/definitions/language"
       mimetype:
         type: "string"
         description: "Default mimetype of this result (only for type: nonhtml_file)"
@@ -857,17 +915,6 @@ definitions:
         items:
           $ref: "#/definitions/Subject"
     description: "An object representing a topic in a bundle."
-  Usefulness:
-    type: "object"
-    properties:
-      promoters:
-        type: "integer"
-        description: "number of users who marked this topic as helpful"
-        example: 503
-      detractors:
-        type: "integer"
-        description: "number of users who marked this topic as unhelpful"
-        example: 43
   User:
     type: "object"
     required:
@@ -1155,6 +1202,10 @@ definitions:
     description: "Represents a piece of content in the system"
   language:
     type: "object"
+    required:
+    - "code"
+    - "id"
+    - "name"
     properties:
       id:
         type: "integer"
@@ -1186,14 +1237,36 @@ definitions:
         format: "date-time"
         description: "Time this topic was updated"
     description: "Object to encapsulate dates for a topic"
+  TocEntry:
+    type: "object"
+    required:
+    - "title"
+    properties:
+      title:
+        type: "string"
+        description: "Human readable title for the table of content"
+        example: "Server configuration"
+      url:
+        type: "string"
+        description: "Url to the specific page of this content."
+        example: "https://docs.acme.com/bundle/bundle23/page/server_configuration_desc.html"
+      childEntries:
+        type: "array"
+        description: "Child nodes of this entry in the table of contents."
+        items:
+          $ref: "#/definitions/TocEntry"
+    description: "Represents a single node in a table of contents."
   searchAnalyzer:
     type: "object"
+    required:
+    - "analyzer_json"
     properties:
       analyzer_json:
         type: "object"
         description: "The elasticsearch analyzer file specified in the system"
       language:
-        $ref: "#/definitions/language"
+        type: "string"
+        description: "The content language this analyzer applies to"
     description: "Represents the Elasticsearch analyzer used in the system."
   Role:
     type: "object"
