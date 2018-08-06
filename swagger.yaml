@@ -508,6 +508,12 @@ paths:
       responses:
         201:
           description: "Status 201"
+          schema:
+            type: "string"
+          examples:
+            application/json: "User already exists"
+        422:
+          description: "User already exists"
   /users/{userid}:
     get:
       summary: "Get user"
@@ -517,6 +523,8 @@ paths:
           description: "Status 200"
           schema:
             $ref: "#/definitions/User"
+        404:
+          description: "User not found"
     put:
       summary: "Update user"
       consumes: []
@@ -529,6 +537,8 @@ paths:
       responses:
         200:
           description: "Status 200"
+        404:
+          description: "User not found"
     delete:
       summary: "Delete user"
       parameters: []
@@ -874,6 +884,8 @@ paths:
           description: "Status 200"
           schema:
             $ref: "#/definitions/ContentRole"
+        404:
+          description: "CRG was not found"
     put:
       summary: "Update CRG"
       consumes: []
@@ -886,6 +898,10 @@ paths:
       responses:
         200:
           description: "Status 200"
+          schema:
+            $ref: "#/definitions/ContentRole"
+        404:
+          description: "CRG not found"
     delete:
       summary: "Delete CRG"
       parameters: []
@@ -967,6 +983,16 @@ definitions:
       likes:
         type: "number"
         description: "[unimplemented] Number of \"likes\" for this topic"
+      bundle_id:
+        type: "string"
+        description: "Id for the publication to which this topic belongs. Only for\
+          \ 'html_topic' and 'nonhtml_file' types."
+        example: "HTML_for_Review"
+      page_id:
+        type: "string"
+        description: "Path within the publication to this topic. Only for 'html_topic'\
+          \ and 'nonhtml_file' types."
+        example: "Content/Contracts/00_Contract_Life_Cycle_Management.htm"
     description: "An object encapsulating a result for a specific search."
   Clustered Result:
     type: "object"
