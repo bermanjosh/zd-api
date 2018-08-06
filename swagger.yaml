@@ -7,6 +7,7 @@ info:
   termsOfService: ""
   contact: {}
 host: "localhost:3000"
+basePath: "/api"
 schemes:
 - "http"
 consumes:
@@ -129,6 +130,11 @@ paths:
         enum:
         - "asc"
         - "dec"
+      - name: "personalize"
+        in: "query"
+        required: false
+        type: "boolean"
+        description: "Weight results based on user-defined personal search preferences"
       - name: "exact_facet_match"
         in: "query"
         required: false
@@ -140,7 +146,7 @@ paths:
           description: "Status 200"
           schema:
             $ref: "#/definitions/Search Results"
-  /bundle/:
+  /bundle:
     get:
       summary: "load a list of bundles"
       parameters:
@@ -266,6 +272,12 @@ paths:
         type: "boolean"
         description: "[Reserved for future implementation] Only return content which\
           \ is *only* tagged with selected facets."
+      - name: "language"
+        in: "query"
+        required: false
+        type: "string"
+        description: "Show only content in this language"
+        x-example: "enus"
       responses:
         200:
           description: "Status 200"
@@ -462,6 +474,16 @@ paths:
         in: "query"
         required: false
         type: "string"
+        description: "The role filter allows you to filter only users associated to\
+          \ this role"
+        x-example: "Employee"
+      - name: "content_role_filter"
+        in: "query"
+        required: false
+        type: "string"
+        description: "The content role filter allows you to filter only users associated\
+          \ to this content role"
+        x-example: "Public"
       responses:
         200:
           description: "Status 200"
@@ -563,6 +585,57 @@ paths:
         required: true
         schema:
           $ref: "#/definitions/searchAnalyzer"
+      responses:
+        204:
+          description: "Status 204"
+      security:
+      - Zoomin Generated Keys: []
+  /admin/search_configuration/preferences:
+    get:
+      summary: "Load"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            type: "object"
+            properties:
+              selectable:
+                type: "array"
+                description: "Returns the list of subject keys marked by an administrator\
+                  \ as permitted for selection as search preferences."
+                items:
+                  $ref: "#/definitions/Subject"
+                example: "[\"ver1\",\"ver3.5\"]"
+              users_selected:
+                type: "array"
+                description: "Returns the list of subject keys already included by\
+                  \ users in their individual search preferences."
+                items:
+                  $ref: "#/definitions/Subject"
+      security:
+      - Zoomin Generated Keys: []
+    put:
+      summary: "Update"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          required:
+          - "selectable_subjectkeys"
+          properties:
+            selectable_subjectkeys:
+              type: "array"
+              description: "Defines an array of strings representing the subject keys\
+                \ which the administrator wishes end-users will be able to choose\
+                \ from when configuring their search preferences."
+              items:
+                type: "string"
+              example: "[\"ver1\",\"ver2\",\"ver3.5\"]"
+          description: "Array of strings representing labelkeys"
       responses:
         204:
           description: "Status 204"
@@ -672,6 +745,158 @@ paths:
       in: "path"
       required: true
       type: "string"
+  /profile/search_preferences:
+    get:
+      summary: "Load"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            type: "object"
+            properties:
+              available:
+                type: "array"
+                description: "Returns the list of subject keys marked by an administrator\
+                  \ as permitted for selection as search preferences."
+                items:
+                  $ref: "#/definitions/Subject"
+              selected:
+                type: "array"
+                description: "Returns the list of subject keys marked by the end-user\
+                  \ as its search preferences."
+                items:
+                  $ref: "#/definitions/Subject"
+    put:
+      summary: "Update"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            selected_subjectkeys:
+              type: "array"
+              description: "Defines an array of strings representing the subject keys\
+                \ which the user wishes to configure as its search preferences."
+              items:
+                type: "string"
+              example: "[\"ver2\"]"
+      responses:
+        204:
+          description: "Status 204"
+  /profile/my_watched_content:
+    get:
+      summary: "List"
+      description: "Returns the list of topics and resources that the user is subscribed\
+        \ to."
+      parameters:
+      - name: "rpp"
+        in: "query"
+        required: false
+        type: "integer"
+        x-example: 20
+      - name: "page"
+        in: "query"
+        required: false
+        type: "integer"
+        x-example: 1
+      - name: "q"
+        in: "query"
+        required: false
+        type: "string"
+        description: "Only display results matching this query."
+        x-example: "shutdown"
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            required:
+            - "pagination"
+            - "watchedContentItemGroups"
+            type: "object"
+            properties:
+              pagination:
+                $ref: "#/definitions/paginationData"
+              watchedContentItemGroups:
+                type: "array"
+                description: "List of content items that the user is watching."
+                items:
+                  $ref: "#/definitions/WatchedContentInBundle"
+  /taxonomy:
+    get:
+      summary: "Load"
+      description: "Load tree of subjects from subject scheme"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            type: "object"
+            properties:
+              subjects:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Subject"
+  /contentgroups:
+    get:
+      summary: "Get all CRGs"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/ContentRole"
+    post:
+      summary: "Create new CRG"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ContentRole"
+      responses:
+        201:
+          description: "Status 201"
+          schema:
+            $ref: "#/definitions/ContentRole"
+  /contentgroups/{crg_id}:
+    get:
+      summary: "Get CRG"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            $ref: "#/definitions/ContentRole"
+    put:
+      summary: "Update CRG"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ContentRole"
+      responses:
+        200:
+          description: "Status 200"
+    delete:
+      summary: "Delete CRG"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+    parameters:
+    - name: "crg_id"
+      in: "path"
+      required: true
+      type: "string"
 securityDefinitions:
   Zoomin Generated Keys:
     type: "apiKey"
@@ -732,11 +957,16 @@ definitions:
         items:
           $ref: "#/definitions/Subject"
       language:
-        $ref: "#/definitions/language"
+        type: "string"
+        description: "Language code for this content"
+        example: "enus"
       mimetype:
         type: "string"
         description: "Default mimetype of this result (only for type: nonhtml_file)"
         example: "application/pdf"
+      likes:
+        type: "number"
+        description: "[unimplemented] Number of \"likes\" for this topic"
     description: "An object encapsulating a result for a specific search."
   Clustered Result:
     type: "object"
@@ -850,6 +1080,10 @@ definitions:
         description: "Bundle name of the bundle set as being canonical to the current\
           \ bundle."
         example: "AISuite_250_ConceptsGuide_allOS_en_HTML5"
+      language:
+        type: "string"
+        description: "Language of this bundle"
+        example: "enus"
     description: "Represents a content bundle in the system."
   BundleAttachment:
     type: "object"
@@ -869,51 +1103,58 @@ definitions:
   Topic:
     type: "object"
     required:
-    - "Breadcrumb HTML"
-    - "Dates"
-    - "Rating"
-    - "Title"
+    - "breadcrumbs_html"
+    - "dates"
+    - "dislikes"
+    - "likes"
+    - "title"
     - "topic_html"
+    - "views"
     properties:
-      Title:
+      title:
         type: "string"
         description: "Title of this topic"
       topic_html:
         type: "string"
         description: "HTML of this topic"
-      Breadcrumb HTML:
+      breadcrumbs_html:
         type: "string"
         description: "HTML of the breadcrumbs of this topic"
-      Views:
-        type: "string"
+      views:
+        type: "integer"
         description: "Number of views of this topic"
-      Dates:
+      dates:
         $ref: "#/definitions/Dates"
-      Like URL:
+      like_url:
         type: "string"
         description: "Link to \"like\" this topic"
-      Dislike URL:
+      dislike_url:
         type: "string"
         description: "Link to \"dislike\" this topic"
-      Likes:
-        type: "number"
+      likes:
+        type: "integer"
         description: "Number of \"likes\" for this topic"
-      Dislikes:
-        type: "number"
+      dislikes:
+        type: "integer"
         description: "Number of \"dislikes\" for this topic"
-      Rating:
+      rating:
         type: "number"
         description: "Average rating of this topic (out of 5)"
-      topic_meta:
-        type: "array"
-        description: "Object of metadata of this topic"
-        items:
-          type: "object"
-      labels:
+      metadata:
+        type: "object"
+        description: "Object of metadata of this topic\nNote - is controlled by the\
+          \ \"include-filelist-metas\" settings parameter."
+        example: "\"metadata\": {\n        \"prodname\": \"ANNC\",\n        \"draftcomment\"\
+          : \"print\",\n        \"bundle\": \"m_AN1551_COFTokenization\"\n    }"
+      '[unimplemented] labels':
         type: "array"
         description: "Tree of labels which apply to this topic"
         items:
           $ref: "#/definitions/Subject"
+      labels_text:
+        type: "string"
+        description: "Textual representation of the tree of labels which apply to\
+          \ this topic"
     description: "An object representing a topic in a bundle."
   User:
     type: "object"
@@ -941,6 +1182,15 @@ definitions:
         type: "boolean"
         description: "Indicates if the user is active or disabled in the system."
         default: true
+      has_api_key:
+        type: "boolean"
+        description: "Indicates if the user has an active API key defined"
+        example: false
+      permissions_overridden:
+        type: "boolean"
+        description: "Indicates whether or not the user permissions have been manually\
+          \ altered"
+        example: false
       registered_at:
         type: "string"
         format: "date-time"
@@ -973,6 +1223,24 @@ definitions:
     description: "This general error structure is used throughout this API."
     example: "{\n  \"code\": 400,\n  \"description\": \"Bad query parameter [$size]:\
       \ Invalid integer value [abc]\",\n  \"reasonPhrase\": \"Bad Request\"\n}"
+  Dates:
+    type: "object"
+    required:
+    - "Added on"
+    properties:
+      Added on:
+        type: "string"
+        format: "date-time"
+        description: "Time this topic was added\n\nTime this topic was added"
+      Created on:
+        type: "string"
+        format: "date-time"
+        description: "Time this topic was created"
+      Updated on:
+        type: "string"
+        format: "date-time"
+        description: "Time this topic was updated"
+    description: "Object to encapsulate dates for a topic"
   paginationData:
     type: "object"
     required:
@@ -1030,28 +1298,6 @@ definitions:
       \ installation\",\n\t\t\"subjecthead_navtitle\": \"Role\"\n\t}]\n},\n{\n\t\"\
       key\": \"maintainer\",\n\t\"navtitle\": \"Maintenance technician\",\n\t\"subjecthead_navtitle\"\
       : \"Role\"\n}]"
-  ContentRole:
-    type: "object"
-    required:
-    - "id"
-    - "includedSubjects"
-    - "name"
-    properties:
-      id:
-        type: "integer"
-        description: "Content role id"
-      name:
-        type: "string"
-        description: "Content role name"
-      description:
-        type: "string"
-        description: "Textual description of the content role"
-      includedSubjects:
-        type: "array"
-        description: "The list of included subjects in this content role"
-        items:
-          $ref: "#/definitions/Subject"
-    description: "Represents a single content role in the system."
   Watermark:
     type: "object"
     required:
@@ -1219,27 +1465,10 @@ definitions:
         description: "Language name"
         example: "English"
     description: "Defines a valid language in the system"
-  Dates:
-    type: "object"
-    required:
-    - "Added on"
-    properties:
-      Added on:
-        type: "string"
-        format: "date-time"
-        description: "Time this topic was added\n\nTime this topic was added"
-      Created on:
-        type: "string"
-        format: "date-time"
-        description: "Time this topic was created"
-      Updated on:
-        type: "string"
-        format: "date-time"
-        description: "Time this topic was updated"
-    description: "Object to encapsulate dates for a topic"
   TocEntry:
     type: "object"
     required:
+    - "bundle_id"
     - "title"
     properties:
       title:
@@ -1255,6 +1484,14 @@ definitions:
         description: "Child nodes of this entry in the table of contents."
         items:
           $ref: "#/definitions/TocEntry"
+      bundle_id:
+        type: "string"
+        description: "The ID of the bundle of the TOC entry"
+        example: "bundle23"
+      nav_path:
+        type: "string"
+        description: "The nav path to the TOC entry."
+        example: "server_configuration_desc.html"
     description: "Represents a single node in a table of contents."
   searchAnalyzer:
     type: "object"
@@ -1311,3 +1548,74 @@ definitions:
         - "U"
         - "D"
     description: "Represents a single permission in the system"
+  WatchedContentItem:
+    type: "object"
+    required:
+    - "dates"
+    - "itemTitle"
+    - "itemUrl"
+    - "subjects"
+    properties:
+      itemTitle:
+        type: "string"
+        description: "Title of this resource/topic"
+      itemUrl:
+        type: "string"
+        description: "Link to the resource/topic"
+      dates:
+        $ref: "#/definitions/Dates"
+      subjects:
+        type: "array"
+        description: "Tree of subjects which apply to this resource/topic"
+        items:
+          $ref: "#/definitions/Subject"
+    description: "An object representing subscription to a specific resource or topic."
+  WatchedContentInBundle:
+    type: "object"
+    required:
+    - "bundleTitle"
+    - "bundleType"
+    - "bundleUrl"
+    - "watchedItems"
+    properties:
+      bundleType:
+        type: "string"
+        description: "Defines the type of the returned bundle: HTMLBundle: Standard\
+          \ publication bundle converted to HTML5 ResourceBundle: Bundle consisting\
+          \ of various non-HTML file formats, e.g. PDF or Word."
+        enum:
+        - "HTMLBundle"
+        - "ResourceBundle"
+        example: "HTMLBundle"
+      bundleTitle:
+        type: "string"
+        description: "The bundle title is a human readable name presented to the viewer"
+      bundleUrl:
+        type: "string"
+        description: "URL to the bundle hosting the watched content."
+      watchedItems:
+        type: "array"
+        items:
+          $ref: "#/definitions/WatchedContentItem"
+  ContentRole:
+    type: "object"
+    required:
+    - "id"
+    - "includedSubjects"
+    - "name"
+    properties:
+      id:
+        type: "integer"
+        description: "Content role id"
+      name:
+        type: "string"
+        description: "Content role name"
+      description:
+        type: "string"
+        description: "Textual description of the content role"
+      includedSubjects:
+        type: "array"
+        description: "The list of included subjects in this content role"
+        items:
+          $ref: "#/definitions/Subject"
+    description: "Represents a single content role in the system."
