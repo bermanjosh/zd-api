@@ -1293,37 +1293,6 @@ definitions:
       previous_page:
         type: "string"
         description: "link to previous page"
-  Subject:
-    type: "object"
-    required:
-    - "key"
-    - "navtitle"
-    properties:
-      key:
-        type: "string"
-        description: "Unique identifier from the subject scheme."
-      navtitle:
-        type: "string"
-        description: "Human readable title"
-      subjecthead_navtitle:
-        type: "string"
-        description: "Human readable title of the containing subjecthead"
-      hidden:
-        type: "boolean"
-        description: "Indicates if the subject is defined as hidden in the subject\
-          \ scheme"
-      children:
-        type: "array"
-        items:
-          $ref: "#/definitions/Subject"
-    description: "Represents a single subjectdef (facet) in the taxonomy. "
-    example: "[{\n\t\"key\": \"installer\",\n\t\"navtitle\": \"Installation technician\"\
-      ,\n\t\"subjecthead_navtitle\": \"Role\",\n\t\"children\": [{\n\t\t\"key\": \"\
-      installerhw\",\n\t\t\"navtitle\": \"Hardware installation\",\n\t\t\"subjecthead_navtitle\"\
-      : \"Role\"\n\t},\n\t{\n\t\t\"key\": \"installersw\",\n\t\t\"navtitle\": \"Software\
-      \ installation\",\n\t\t\"subjecthead_navtitle\": \"Role\"\n\t}]\n},\n{\n\t\"\
-      key\": \"maintainer\",\n\t\"navtitle\": \"Maintenance technician\",\n\t\"subjecthead_navtitle\"\
-      : \"Role\"\n}]"
   Watermark:
     type: "object"
     required:
@@ -1623,6 +1592,30 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/WatchedContentItem"
+  Subject:
+    type: "object"
+    required:
+    - "key"
+    - "navtitle"
+    properties:
+      key:
+        type: "string"
+        description: "Unique identifier from the subject scheme."
+      navtitle:
+        type: "string"
+        description: "Human readable title"
+      subjecthead_navtitle:
+        type: "string"
+        description: "Human readable title of the containing subjecthead"
+      hidden:
+        type: "boolean"
+        description: "Indicates if the subject is defined as hidden in the subject\
+          \ scheme"
+    description: "Represents a single subjectdef (facet) in the taxonomy. "
+    example: "[{\n\t\"key\": \"installer\",\n\t\"navtitle\": \"Installation technician\"\
+      ,\n\t\"subjecthead_navtitle\": \"Role\",\n },\n {\n\t\"key\": \"maintainer\"\
+      ,\n\t\"navtitle\": \"Maintenance technician\",\n\t\"subjecthead_navtitle\":\
+      \ \"Role\"\n }\n]"
   ContentRole:
     type: "object"
     required:
