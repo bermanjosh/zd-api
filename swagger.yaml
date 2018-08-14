@@ -915,7 +915,7 @@ paths:
       in: "path"
       required: true
       type: "string"
-  /article/{slug}:
+  /article/{articleId}:
     get:
       summary: "Access a contributed Article"
       parameters: []
@@ -925,7 +925,7 @@ paths:
           schema:
             $ref: "#/definitions/Article"
     parameters:
-    - name: "slug"
+    - name: "articleId"
       in: "path"
       required: true
       type: "string"
@@ -1674,7 +1674,6 @@ definitions:
     - "dislikes"
     - "html"
     - "labels"
-    - "labels_text"
     - "likes"
     - "title"
     - "views"
@@ -1711,3 +1710,10 @@ definitions:
         type: "string"
         description: "Textual representation of the tree of labels which apply to\
           \ this article"
+      rating:
+        type: "integer"
+        description: "Average rating of this article (out of 5)"
+      expirationDate:
+        type: "string"
+        format: "date"
+        description: "Expiration Date of this Article"
