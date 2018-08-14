@@ -844,12 +844,14 @@ paths:
         200:
           description: "Status 200"
           schema:
+            required:
+            - "subjects"
             type: "object"
             properties:
               subjects:
                 type: "array"
                 items:
-                  $ref: "#/definitions/Subject"
+                  $ref: "#/definitions/TaxonomyObject"
   /contentgroups:
     get:
       summary: "Get all CRGs"
@@ -910,6 +912,20 @@ paths:
           description: "Status 200"
     parameters:
     - name: "crg_id"
+      in: "path"
+      required: true
+      type: "string"
+  /article/{slug}:
+    get:
+      summary: "Access a contributed Article"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            $ref: "#/definitions/Article"
+    parameters:
+    - name: "slug"
       in: "path"
       required: true
       type: "string"
@@ -1595,6 +1611,7 @@ definitions:
   Subject:
     type: "object"
     required:
+    - "hidden"
     - "key"
     - "navtitle"
     properties:
@@ -1616,6 +1633,18 @@ definitions:
       ,\n\t\"subjecthead_navtitle\": \"Role\",\n },\n {\n\t\"key\": \"maintainer\"\
       ,\n\t\"navtitle\": \"Maintenance technician\",\n\t\"subjecthead_navtitle\":\
       \ \"Role\"\n }\n]"
+  TaxonomyObject:
+    type: "object"
+    required:
+    - "subject"
+    properties:
+      subject:
+        $ref: "#/definitions/Subject"
+      children:
+        type: "array"
+        description: "Descendants of this node"
+        items:
+          $ref: "#/definitions/TaxonomyObject"
   ContentRole:
     type: "object"
     required:
@@ -1638,3 +1667,47 @@ definitions:
         items:
           $ref: "#/definitions/Subject"
     description: "Represents a single content role in the system."
+  Article:
+    type: "object"
+    required:
+    - "dates"
+    - "dislikes"
+    - "html"
+    - "labels"
+    - "labels_text"
+    - "likes"
+    - "title"
+    - "views"
+    properties:
+      title:
+        type: "string"
+        description: "Title of this article"
+      html:
+        type: "string"
+        description: "HTML of this article"
+      views:
+        type: "integer"
+        description: "Number of views of this article"
+      dates:
+        $ref: "#/definitions/Dates"
+      likeUrl:
+        type: "string"
+        description: "Link to “like” this article"
+      dislikeUrl:
+        type: "string"
+        description: "Link to “dislike” this article"
+      likes:
+        type: "integer"
+        description: "Number of “likes” for this article"
+      dislikes:
+        type: "string"
+        description: "Number of “dislikes” for this article"
+      labels:
+        type: "array"
+        description: "List of labels which apply to this article"
+        items:
+          $ref: "#/definitions/Subject"
+      labels_text:
+        type: "string"
+        description: "Textual representation of the tree of labels which apply to\
+          \ this article"
