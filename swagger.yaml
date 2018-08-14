@@ -1614,6 +1614,7 @@ definitions:
     - "hidden"
     - "key"
     - "navtitle"
+    - "outputclasses"
     properties:
       key:
         type: "string"
@@ -1628,6 +1629,11 @@ definitions:
         type: "boolean"
         description: "Indicates if the subject is defined as hidden in the subject\
           \ scheme"
+      outputclasses:
+        type: "array"
+        description: "What non-magical outputclasses apply to this subject."
+        items:
+          type: "string"
     description: "Represents a single subjectdef (facet) in the taxonomy. "
     example: "[{\n\t\"key\": \"installer\",\n\t\"navtitle\": \"Installation technician\"\
       ,\n\t\"subjecthead_navtitle\": \"Role\",\n },\n {\n\t\"key\": \"maintainer\"\
