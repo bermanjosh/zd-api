@@ -929,6 +929,40 @@ paths:
       in: "path"
       required: true
       type: "string"
+  /vote/{pageid}:
+    put:
+      summary: "Vote to like or dislike the specified content page"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/VoteAction"
+      responses:
+        204:
+          description: "The vote was registered."
+        401:
+          description: "Not authorized to vote on this content."
+        404:
+          description: "The specified content doesn't exist or is not visible to the\
+            \ client."
+    delete:
+      summary: "Delete an existing vote."
+      parameters: []
+      responses:
+        204:
+          description: "The vote was deleted."
+        401:
+          description: "Not authorized to vote on this page."
+        404:
+          description: "The specified content does not exist or is not visible to\
+            \ this client."
+    parameters:
+    - name: "pageid"
+      in: "path"
+      required: true
+      type: "string"
 securityDefinitions:
   Zoomin Generated Keys:
     type: "apiKey"
@@ -1622,9 +1656,10 @@ definitions:
       navtitle:
         type: "string"
         description: "Human readable title"
-      subjecthead_navtitle:
+      subjectheadNavtitle:
         type: "string"
-        description: "Human readable title of the containing subjecthead"
+        description: "Human readable title of the containing subjecthead - if this\
+          \ facet is itself a subjecthead, this will be 'null'."
       hidden:
         type: "boolean"
         description: "Indicates if the subject is defined as hidden in the subject\
@@ -1634,11 +1669,7 @@ definitions:
         description: "What non-magical outputclasses apply to this subject."
         items:
           type: "string"
-    description: "Represents a single subjectdef (facet) in the taxonomy. "
-    example: "[{\n\t\"key\": \"installer\",\n\t\"navtitle\": \"Installation technician\"\
-      ,\n\t\"subjecthead_navtitle\": \"Role\",\n },\n {\n\t\"key\": \"maintainer\"\
-      ,\n\t\"navtitle\": \"Maintenance technician\",\n\t\"subjecthead_navtitle\":\
-      \ \"Role\"\n }\n]"
+    description: "Represents a single facet in the system taxonomy"
   TaxonomyObject:
     type: "object"
     required:
@@ -1723,3 +1754,12 @@ definitions:
         type: "string"
         format: "date"
         description: "Expiration Date of this Article"
+  VoteAction:
+    type: "object"
+    required:
+    - "vote"
+    properties:
+      vote:
+        type: "string"
+        description: "\"like\" or \"dislike\""
+    example: "{\n    \"vote\": \"like\"\n}"
