@@ -1779,8 +1779,12 @@ definitions:
     example: "{\n    \"vote\": \"like\"\n}"
   CategoryNode:
     type: "object"
+    required:
+    - "[TBD] prettyLink"
+    - "nodeType"
+    - "route"
     properties:
-      NodeType:
+      nodeType:
         type: "string"
         description: "Type of Node"
         enum:
@@ -1788,6 +1792,38 @@ definitions:
         - "NodeBundle"
         - "NodeLink"
         - "NodeSearch"
+      outputclass:
+        type: "array"
+        description: "Outputclass values for this link"
+        items:
+          type: "string"
+      route:
+        type: "string"
+        description: "Route to access this node (search, bundle or category)"
+      '[TBD] prettyLink':
+        type: "string"
+      description:
+        type: "string"
+        description: "Description of this node"
+      id:
+        type: "string"
+        description: "Id (slug) of this node"
+      icon:
+        type: "string"
+        description: "Icon name of this node"
+      linkText:
+        type: "string"
+        description: "Linktext (title) of this node"
+      subLinks:
+        type: "array"
+        description: "CategoryLinks of this node"
+        items:
+          $ref: "#/definitions/CategoryLink"
+      children:
+        type: "array"
+        description: "Subnodes of this node"
+        items:
+          $ref: "#/definitions/CategoryNode"
   CategoryLink:
     type: "object"
     required:
