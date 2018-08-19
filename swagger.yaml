@@ -389,8 +389,7 @@ paths:
         in: "query"
         required: false
         type: "integer"
-        description: "Number of the page to retrieve\n\nNumber of the page to retrieve\n\
-          \nNumber of the page to retrieve\n\nNumber of the page to retrieve"
+        description: "Number of the page to retrieve"
         x-example: 1
       - name: "name_filter.field"
         in: "query"
@@ -509,11 +508,15 @@ paths:
         201:
           description: "Status 201"
           schema:
+            $ref: "#/definitions/User"
+          examples:
+            application/json: "The newly created user"
+        422:
+          description: "User already exists"
+          schema:
             type: "string"
           examples:
             application/json: "User already exists"
-        422:
-          description: "User already exists"
   /users/{userid}:
     get:
       summary: "Get user"
@@ -537,6 +540,10 @@ paths:
       responses:
         200:
           description: "Status 200"
+          schema:
+            $ref: "#/definitions/User"
+          examples:
+            application/json: "The updated user"
         404:
           description: "User not found"
     delete:
@@ -544,7 +551,7 @@ paths:
       parameters: []
       responses:
         200:
-          description: "Status 200"
+          description: "Will set the user to be active = false"
         401:
           description: "Status 401"
           schema:
@@ -929,7 +936,7 @@ paths:
       in: "path"
       required: true
       type: "string"
-  /vote/{pageid}:
+  /vote/{pageId}:
     put:
       summary: "Vote to like or dislike the specified content page"
       consumes: []
@@ -959,7 +966,7 @@ paths:
           description: "The specified content does not exist or is not visible to\
             \ this client."
     parameters:
-    - name: "pageid"
+    - name: "pageId"
       in: "path"
       required: true
       type: "string"
@@ -1043,6 +1050,10 @@ definitions:
         description: "Path within the publication to this topic. Only for 'html_topic'\
           \ and 'nonhtml_file' types."
         example: "Content/Contracts/00_Contract_Life_Cycle_Management.htm"
+      expiration_date:
+        type: "string"
+        format: "date-time"
+        description: "Expiration date of article. Only for 'contributed_article' type."
     description: "An object encapsulating a result for a specific search."
   Clustered Result:
     type: "object"
@@ -1738,6 +1749,9 @@ definitions:
       dislikes:
         type: "string"
         description: "Number of “dislikes” for this article"
+      rating:
+        type: "integer"
+        description: "Average rating of this article (out of 5)"
       labels:
         type: "array"
         description: "List of labels which apply to this article"
@@ -1747,9 +1761,6 @@ definitions:
         type: "string"
         description: "Textual representation of the tree of labels which apply to\
           \ this article"
-      rating:
-        type: "integer"
-        description: "Average rating of this article (out of 5)"
       expirationDate:
         type: "string"
         format: "date"
@@ -1762,4 +1773,36 @@ definitions:
       vote:
         type: "string"
         description: "\"like\" or \"dislike\""
+        enum:
+        - "like"
+        - "dislike"
     example: "{\n    \"vote\": \"like\"\n}"
+  CategoryNode:
+    type: "object"
+    properties:
+      NodeType:
+        type: "string"
+        description: "Type of Node"
+        enum:
+        - "NodeCategory"
+        - "NodeBundle"
+        - "NodeLink"
+        - "NodeSearch"
+  CategoryLink:
+    type: "object"
+    required:
+    - "linkText"
+    - "route"
+    properties:
+      linkText:
+        type: "string"
+        description: "Text to display for this link"
+      route:
+        type: "string"
+        description: "URL of this link"
+      outputclass:
+        type: "array"
+        description: "Outputclass values for this link"
+        items:
+          type: "string"
+    description: "Links shown in a category box"
