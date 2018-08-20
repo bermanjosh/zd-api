@@ -970,6 +970,17 @@ paths:
       in: "path"
       required: true
       type: "string"
+  /categories:
+    get:
+      summary: "Retrieve the forest-structure of category nodes"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/CategoryNode"
 securityDefinitions:
   Zoomin Generated Keys:
     type: "apiKey"
