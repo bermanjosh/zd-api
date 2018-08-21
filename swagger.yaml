@@ -1014,8 +1014,8 @@ definitions:
         example: "Codec Installation Guide"
       score:
         type: "number"
-        description: "Search engine relevancy score (on a scale between 0 to 1)"
-        example: 0.877
+        description: "Search engine relevance score"
+        example: 34.98
       type:
         type: "string"
         description: "Type of search result"
@@ -1792,8 +1792,12 @@ definitions:
     type: "object"
     required:
     - "[TBD] prettyLink"
+    - "children"
+    - "linkText"
     - "nodeType"
+    - "outputclass"
     - "route"
+    - "subLinks"
     properties:
       nodeType:
         type: "string"
@@ -1825,6 +1829,10 @@ definitions:
       linkText:
         type: "string"
         description: "Linktext (title) of this node"
+      checkedFacets:
+        type: "array"
+        items:
+          type: "string"
       subLinks:
         type: "array"
         description: "CategoryLinks of this node"
@@ -1839,6 +1847,7 @@ definitions:
     type: "object"
     required:
     - "linkText"
+    - "outputclass"
     - "route"
     properties:
       linkText:
