@@ -416,6 +416,7 @@ paths:
         enum:
         - "internal_authentication"
         - "sso"
+        - "http_headers"
         x-example: "internal_authentication"
       - name: "active_filter"
         in: "query"
@@ -991,6 +992,8 @@ definitions:
     type: "object"
     required:
     - "dates"
+    - "dislikes"
+    - "likes"
     - "snippet"
     - "title"
     - "type"
@@ -1049,8 +1052,11 @@ definitions:
         description: "Default mimetype of this result (only for type: nonhtml_file)"
         example: "application/pdf"
       likes:
-        type: "number"
+        type: "integer"
         description: "[unimplemented] Number of \"likes\" for this topic"
+      dislikes:
+        type: "integer"
+        description: "[unimplemented] Number of \"dislikes\" for this topic"
       bundle_id:
         type: "string"
         description: "Id for the publication to which this topic belongs. Only for\
@@ -1748,20 +1754,20 @@ definitions:
         description: "Number of views of this article"
       dates:
         $ref: "#/definitions/Dates"
-      likeUrl:
+      like_url:
         type: "string"
         description: "Link to “like” this article"
-      dislikeUrl:
+      dislike_url:
         type: "string"
         description: "Link to “dislike” this article"
       likes:
         type: "integer"
         description: "Number of “likes” for this article"
       dislikes:
-        type: "string"
+        type: "integer"
         description: "Number of “dislikes” for this article"
       rating:
-        type: "integer"
+        type: "number"
         description: "Average rating of this article (out of 5)"
       labels:
         type: "array"
@@ -1772,7 +1778,7 @@ definitions:
         type: "string"
         description: "Textual representation of the tree of labels which apply to\
           \ this article"
-      expirationDate:
+      expiration_date:
         type: "string"
         format: "date"
         description: "Expiration Date of this Article"
