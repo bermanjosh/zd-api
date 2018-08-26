@@ -86,11 +86,10 @@ paths:
           \nLast revised: The date which the content was last revised based on the\
           \ CMS/authoring tool records (if specified).\n\nLast uploaded: The UTC dateTime\
           \ which the content was last uploaded"
-        default: "last_uploaded"
         enum:
         - "created"
-        - "last_revised"
-        - "last_uploaded"
+        - "lastRevised"
+        - "lastUploaded"
         x-example: "created"
       - name: "date_filter.startValue"
         in: "query"
@@ -114,18 +113,18 @@ paths:
         default: "score"
         enum:
         - "created"
-        - "last_revised"
-        - "last_uploaded"
+        - "lastRevised"
+        - "lastUploaded"
         - "title"
         - "score"
+        - "likes"
         - "views (reserved for future use)"
-        x-example: "last_revised"
+        x-example: "created"
       - name: "sort.value"
         in: "query"
         required: true
         type: "string"
-        description: "What order to sort by\n\nWhat order to sort by\n\nWhat order\
-          \ to sort by"
+        description: "What order to sort by"
         default: "dec"
         enum:
         - "asc"
@@ -860,7 +859,7 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/definitions/TaxonomyObject"
-  /contentgroups:
+  /contentrolegroups:
     get:
       summary: "Get all CRGs"
       parameters: []
@@ -870,7 +869,7 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/ContentRole"
+              $ref: "#/definitions/ContentRoleGroup"
     post:
       summary: "Create new CRG"
       consumes: []
@@ -879,13 +878,13 @@ paths:
         in: "body"
         required: true
         schema:
-          $ref: "#/definitions/ContentRole"
+          $ref: "#/definitions/ContentRoleGroup"
       responses:
         201:
           description: "Status 201"
           schema:
-            $ref: "#/definitions/ContentRole"
-  /contentgroups/{crg_id}:
+            $ref: "#/definitions/ContentRoleGroup"
+  /contentrolegroup/{crgId}:
     get:
       summary: "Get CRG"
       parameters: []
@@ -893,7 +892,7 @@ paths:
         200:
           description: "Status 200"
           schema:
-            $ref: "#/definitions/ContentRole"
+            $ref: "#/definitions/ContentRoleGroup"
         404:
           description: "CRG was not found"
     put:
@@ -904,12 +903,12 @@ paths:
         in: "body"
         required: true
         schema:
-          $ref: "#/definitions/ContentRole"
+          $ref: "#/definitions/ContentRoleGroup"
       responses:
         200:
           description: "Status 200"
           schema:
-            $ref: "#/definitions/ContentRole"
+            $ref: "#/definitions/ContentRoleGroup"
         404:
           description: "CRG not found"
     delete:
@@ -919,10 +918,10 @@ paths:
         200:
           description: "Status 200"
     parameters:
-    - name: "crg_id"
+    - name: "crgId"
       in: "path"
       required: true
-      type: "string"
+      type: "integer"
   /article/{articleId}:
     get:
       summary: "Access a contributed Article"
@@ -1485,7 +1484,7 @@ definitions:
         description: "The campaign would only be presented to users associated with\
           \ the content roles appearing in this array"
         items:
-          $ref: "#/definitions/ContentRole"
+          $ref: "#/definitions/ContentRoleGroup"
     description: "Represents a campaign or announcement in the system."
   Sitemap:
     type: "object"
@@ -1710,7 +1709,7 @@ definitions:
         description: "Descendants of this node"
         items:
           $ref: "#/definitions/TaxonomyObject"
-  ContentRole:
+  ContentRoleGroup:
     type: "object"
     required:
     - "id"
@@ -1731,7 +1730,7 @@ definitions:
         description: "The list of included subjects in this content role"
         items:
           $ref: "#/definitions/Subject"
-    description: "Represents a single content role in the system."
+    description: "Represents a single content role group in the system."
   Article:
     type: "object"
     required:
