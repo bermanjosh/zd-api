@@ -1031,7 +1031,7 @@ definitions:
         $ref: "#/definitions/Dates"
       views:
         type: "integer"
-        description: "Number of this result was viewed"
+        description: "[reserved for future use] Number of this result was viewed"
         example: 55
       rating:
         type: "number"
@@ -1052,10 +1052,10 @@ definitions:
         example: "application/pdf"
       likes:
         type: "integer"
-        description: "[unimplemented] Number of \"likes\" for this topic"
+        description: "Number of \"likes\" for this topic"
       dislikes:
         type: "integer"
-        description: "[unimplemented] Number of \"dislikes\" for this topic"
+        description: "Number of \"dislikes\" for this topic"
       bundle_id:
         type: "string"
         description: "Id for the publication to which this topic belongs. Only for\
