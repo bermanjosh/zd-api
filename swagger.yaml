@@ -1774,8 +1774,9 @@ definitions:
         example: "HTML_for_Review"
       page_id:
         type: "string"
-        description: "Path within the publication to this topic. Only for 'html_topic'\
-          \ and 'nonhtml_file' types."
+        description: "Path within the publication to this topic. For 'html_topic'\
+          \ and 'nonhtml_file' types,  this represents the 'navpath' of the result.\
+          \ For 'contributed_article' results, this represents the 'articleId'."
         example: "Content/Contracts/00_Contract_Life_Cycle_Management.htm"
       expiration_date:
         type: "string"
