@@ -24,7 +24,7 @@ paths:
         required: false
         type: "string"
         description: "Text query you want to match against"
-      - name: "type"
+      - name: "source"
         in: "query"
         required: false
         type: "string"
@@ -34,7 +34,7 @@ paths:
         - "contributedArticle"
         - "contributedVideo"
         - "all"
-        x-example: "type=bundle"
+        x-example: "bundle"
       - name: "rpp"
         in: "query"
         required: false
@@ -145,7 +145,7 @@ paths:
           description: "Status 200"
           schema:
             $ref: "#/definitions/Search Results"
-  /bundle:
+  /bundlelist:
     get:
       summary: "load a list of bundles"
       parameters:
@@ -354,6 +354,47 @@ paths:
       in: "path"
       required: true
       type: "string"
+  /bundle/{bundleid}/pdf:
+    post:
+      summary: "Initiate generation of a PDF for the entire bundle."
+      description: "Initiate generation of a PDF for the entire publication. Processing\
+        \ of the PDF happens asynchronously in the background. Creates a PDF job token\
+        \ which can be used to check the status of PDF processing and to download\
+        \ the PDF when processing is complete."
+      parameters:
+      - name: "with_toc"
+        in: "query"
+        required: false
+        type: "boolean"
+        description: "Include a TOC in the generated PDF if it contains more than\
+          \ one topic. Default: false"
+        x-example: "https://mysite.example.com/api/bundle/mymanual/pdf?with_toc=true"
+      - name: "_LANG"
+        in: "query"
+        required: false
+        type: "string"
+        description: "An RFC 5646 language tag that specifies which language version\
+          \ of the publication to use. Default: en-US"
+        x-example: "https://mysite.example.com/api/bundle/mymanual/pdf?_LANG=es-MX"
+      responses:
+        200:
+          description: "A background job to create the PDF has been successfully initiated."
+          schema:
+            required:
+            - "job_token"
+            type: "object"
+            properties:
+              job_token:
+                type: "string"
+                description: "A token that identifies the PDF generation job. The\
+                  \ token can be used to check the status of PDF generation, and to\
+                  \ obtain a download token that can be used to download the completed\
+                  \ PDF."
+    parameters:
+    - name: "bundleid"
+      in: "path"
+      required: true
+      type: "string"
   /bundle/bundleid/page: {}
   /bundle/{bundleid}/page/{navpath}:
     get:
@@ -365,6 +406,55 @@ paths:
           description: "Status 200"
           schema:
             $ref: "#/definitions/Topic"
+    parameters:
+    - name: "bundleid"
+      in: "path"
+      required: true
+      type: "string"
+    - name: "navpath"
+      in: "path"
+      required: true
+      type: "string"
+  /bundle/{bundleid}/pdf/page/{navpath}:
+    post:
+      summary: "Initiate generation of a PDF for a single topic in a bundle"
+      description: "Initiate generation of a PDF a single topic within a publication.\
+        \ The children of the topic in the TOC can optionally be included. Processing\
+        \ of the PDF happens asynchronously in the background. Creates a PDF job token\
+        \ which can be used to check the status of PDF processing and to download\
+        \ the PDF when processing is complete."
+      parameters:
+      - name: "with_child"
+        in: "query"
+        required: false
+        type: "boolean"
+        description: "Include all subtopics of the topic, as indicated in the TOC.\
+          \ Default: false"
+        x-example: "https://mysite.example.com/api/bundle/mymanual/pdf/page/mytopic.html?with_child=true"
+      - name: "with_toc"
+        in: "query"
+        required: false
+        type: "boolean"
+        description: "Include a TOC in the generated PDF if it contains more than\
+          \ one topic. Default: false"
+        x-example: "https://mysite.example.com/api/bundle/mymanual/pdf/page/mytopic.html?with_toc=true"
+      - name: "_LANG"
+        in: "query"
+        required: false
+        type: "string"
+        description: "An RFC 5646 language tag that specifies which language version\
+          \ of the publication to use. Default: en-US"
+        x-example: "https://mysite.example.com/api/bundle/mymanual/pdf/page/mytopic.html?_LANG=es-MX"
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            required:
+            - "job_token"
+            type: "object"
+            properties:
+              job_token:
+                type: "string"
     parameters:
     - name: "bundleid"
       in: "path"
@@ -558,16 +648,6 @@ paths:
             $ref: "#/definitions/Error"
     parameters:
     - name: "userid"
-      in: "path"
-      required: true
-      type: "string"
-  /users/{userid}/roles/{roleid}:
-    parameters:
-    - name: "userid"
-      in: "path"
-      required: true
-      type: "string"
-    - name: "roleid"
       in: "path"
       required: true
       type: "string"
@@ -859,6 +939,75 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/definitions/TaxonomyObject"
+                example: "[\n  {\n    \"subject\": {\n      \"subjectheadNavtitle\"\
+                  : null,\n      \"navtitle\": \"Product\",\n      \"outputclasses\"\
+                  : [],\n      \"key\": \"missingID\",\n      \"hidden\": false\n\
+                  \    },\n    \"children\": [\n      {\n        \"subject\": {\n\
+                  \          \"subjectheadNavtitle\": \"Product\",\n          \"navtitle\"\
+                  : \"Web server\",\n          \"outputclasses\": [],\n          \"\
+                  key\": \"server\",\n          \"hidden\": false\n        },\n  \
+                  \      \"children\": []\n      },\n      {\n        \"subject\"\
+                  : {\n          \"subjectheadNavtitle\": \"Product\",\n         \
+                  \ \"navtitle\": \"Disk drive\",\n          \"outputclasses\": [],\n\
+                  \          \"key\": \"disk\",\n          \"hidden\": false\n   \
+                  \     },\n        \"children\": []\n      },\n      {\n        \"\
+                  subject\": {\n          \"subjectheadNavtitle\": \"Product\",\n\
+                  \          \"navtitle\": \"Database\",\n          \"outputclasses\"\
+                  : [],\n          \"key\": \"database\",\n          \"hidden\": false\n\
+                  \        },\n        \"children\": []\n      }\n    ]\n  },\n  {\n\
+                  \    \"subject\": {\n      \"subjectheadNavtitle\": null,\n    \
+                  \  \"navtitle\": \"Task\",\n      \"outputclasses\": [],\n     \
+                  \ \"key\": \"missingID1\",\n      \"hidden\": false\n    },\n  \
+                  \  \"children\": [\n      {\n        \"subject\": {\n          \"\
+                  subjectheadNavtitle\": \"Task\",\n          \"navtitle\": \"Installation\"\
+                  ,\n          \"outputclasses\": [],\n          \"key\": \"installing\"\
+                  ,\n          \"hidden\": false\n        },\n        \"children\"\
+                  : []\n      },\n      {\n        \"subject\": {\n          \"subjectheadNavtitle\"\
+                  : \"Task\",\n          \"navtitle\": \"Configuration\",\n      \
+                  \    \"outputclasses\": [],\n          \"key\": \"configuring\"\
+                  ,\n          \"hidden\": false\n        },\n        \"children\"\
+                  : []\n      },\n      {\n        \"subject\": {\n          \"subjectheadNavtitle\"\
+                  : \"Task\",\n          \"navtitle\": \"Maintenance\",\n        \
+                  \  \"outputclasses\": [],\n          \"key\": \"maintaining\",\n\
+                  \          \"hidden\": false\n        },\n        \"children\":\
+                  \ []\n      },\n      {\n        \"subject\": {\n          \"subjectheadNavtitle\"\
+                  : \"Task\",\n          \"navtitle\": \"Troubleshooting\",\n    \
+                  \      \"outputclasses\": [],\n          \"key\": \"troubleshooting\"\
+                  ,\n          \"hidden\": false\n        },\n        \"children\"\
+                  : []\n      }\n    ]\n  },\n  {\n    \"subject\": {\n      \"subjectheadNavtitle\"\
+                  : null,\n      \"navtitle\": \"Role\",\n      \"outputclasses\"\
+                  : [],\n      \"key\": \"missingID2\",\n      \"hidden\": false\n\
+                  \    },\n    \"children\": [\n      {\n        \"subject\": {\n\
+                  \          \"subjectheadNavtitle\": \"Role\",\n          \"navtitle\"\
+                  : \"Installation technician\",\n          \"outputclasses\": [],\n\
+                  \          \"key\": \"installer\",\n          \"hidden\": false\n\
+                  \        },\n        \"children\": [\n          {\n            \"\
+                  subject\": {\n              \"subjectheadNavtitle\": \"Role\",\n\
+                  \              \"navtitle\": \"Hardware installation technician\"\
+                  ,\n              \"outputclasses\": [],\n              \"key\":\
+                  \ \"installerhw\",\n              \"hidden\": false\n          \
+                  \  },\n            \"children\": []\n          },\n          {\n\
+                  \            \"subject\": {\n              \"subjectheadNavtitle\"\
+                  : \"Role\",\n              \"navtitle\": \"Software installation\
+                  \ technician\",\n              \"outputclasses\": [],\n        \
+                  \      \"key\": \"installersw\",\n              \"hidden\": false\n\
+                  \            },\n            \"children\": []\n          }\n   \
+                  \     ]\n      },\n      {\n        \"subject\": {\n          \"\
+                  subjectheadNavtitle\": \"Role\",\n          \"navtitle\": \"Maintenance\
+                  \ technician\",\n          \"outputclasses\": [],\n          \"\
+                  key\": \"maintainer\",\n          \"hidden\": false\n        },\n\
+                  \        \"children\": [\n          {\n            \"subject\":\
+                  \ {\n              \"subjectheadNavtitle\": \"Role\",\n        \
+                  \      \"navtitle\": \"Hardware maintenance technician\",\n    \
+                  \          \"outputclasses\": [],\n              \"key\": \"maintainerhw\"\
+                  ,\n              \"hidden\": false\n            },\n           \
+                  \ \"children\": []\n          },\n          {\n            \"subject\"\
+                  : {\n              \"subjectheadNavtitle\": \"Role\",\n        \
+                  \      \"navtitle\": \"Software maintenance technician\",\n    \
+                  \          \"outputclasses\": [],\n              \"key\": \"maintainersw\"\
+                  ,\n              \"hidden\": false\n            },\n           \
+                  \ \"children\": []\n          }\n        ]\n      }\n    ]\n  }\n\
+                  ]"
   /contentrolegroups:
     get:
       summary: "Get all CRGs"
@@ -936,6 +1085,32 @@ paths:
       in: "path"
       required: true
       type: "string"
+  /article/{articleid}/pdf:
+    post:
+      description: "Initiate generation of a PDF for an article. Processing of the\
+        \ PDF happens asynchronously in the background. Creates a PDF job token which\
+        \ can be used to check the status of PDF processing and to download the PDF\
+        \ when processing is complete."
+      parameters: []
+      responses:
+        200:
+          description: "A background job to create the PDF has been successfully initiated."
+          schema:
+            required:
+            - "job_token"
+            type: "object"
+            properties:
+              job_token:
+                type: "string"
+                description: "A token that identifies the PDF generation job. The\
+                  \ token can be used to check the status of PDF generation, and to\
+                  \ obtain a download token that can be used to download the completed\
+                  \ PDF."
+    parameters:
+    - name: "articleid"
+      in: "path"
+      required: true
+      type: "string"
   /vote/{pageId}:
     put:
       summary: "Vote to like or dislike the specified content page"
@@ -981,6 +1156,542 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/CategoryNode"
+  /mydocs/suggest/pdftitle:
+    get:
+      summary: "Suggest a PDF title based on selected MyDocs entries"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            required:
+            - "hasMany"
+            - "title"
+            type: "object"
+            properties:
+              title:
+                type: "string"
+                description: "The suggested title for the PDF"
+              hasMany:
+                type: "boolean"
+                description: "Indicates if the generated PDF will contain several\
+                  \ topics"
+  /mydocs/toc/move/{current}/{newParent}/{newPrevious}/{requestHash}:
+    get:
+      summary: "Move a ToC item to another place in the tree"
+      parameters: []
+      responses:
+        303:
+          description: "Redirects to Publications"
+    parameters:
+    - name: "current"
+      in: "path"
+      required: true
+      type: "string"
+    - name: "newParent"
+      in: "path"
+      required: true
+      type: "string"
+    - name: "newPrevious"
+      in: "path"
+      required: true
+      type: "string"
+    - name: "requestHash"
+      in: "path"
+      required: true
+      type: "string"
+  /mydocs/collections:
+    get:
+      summary: "Receive a list of collections"
+      description: "Delivers the results in chunks of 50 items."
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+  /mydocs/collection/{collectionId}:
+    get:
+      summary: "Get this collection"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            required:
+            - "collection"
+            - "topics"
+            type: "object"
+            properties:
+              collection:
+                $ref: "#/definitions/Collection"
+              topics:
+                type: "array"
+                items:
+                  $ref: "#/definitions/FavTopic"
+    post:
+      summary: "Update this collection"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/CollectionPatch"
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            required:
+            - "default"
+            - "rename"
+            - "sortBy"
+            - "unshare"
+            type: "object"
+            properties:
+              rename:
+                type: "string"
+                description: "Was the collection renamed?"
+              default:
+                type: "boolean"
+                description: "Was the collection set as default?"
+              unshare:
+                type: "boolean"
+                description: "Was the collection unshared?"
+              sortBy:
+                type: "boolean"
+                description: "FIXME not implemented"
+    delete:
+      summary: "Delete a collection"
+      parameters: []
+      responses:
+        202:
+          description: "Status 202"
+          schema:
+            required:
+            - "currDefColl"
+            type: "object"
+            properties:
+              currDefColl:
+                type: "integer"
+                description: "The collection that is the default after this request."
+    parameters:
+    - name: "collectionId"
+      in: "path"
+      required: true
+      type: "string"
+  /mydocs/collection/{collectionId}/topic/{pubNavNumber}:
+    get:
+      summary: "Return a list of topics on one level from one parent"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            required:
+            - "deductCount"
+            - "html"
+            type: "object"
+            properties:
+              deductCount:
+                type: "integer"
+              html:
+                type: "string"
+                description: "Widget containing topics"
+    put:
+      summary: "Add a new topic to a collection"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/NewTopic"
+      responses:
+        200:
+          description: "Status 200"
+    delete:
+      summary: "Delete a topic from a collection"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            required:
+            - "newCollCount"
+            type: "object"
+            properties:
+              newCollCount:
+                type: "integer"
+                description: "The new number of topics in the collection"
+    parameters:
+    - name: "collectionId"
+      in: "path"
+      required: true
+      type: "string"
+    - name: "pubNavNumber"
+      in: "path"
+      required: true
+      type: "string"
+  /mydocs/info/collection/{collectionId}/topic/{path}:
+    get:
+      summary: "Return information on this specific topic."
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            type: "object"
+            properties:
+              topic:
+                type: "string"
+    parameters:
+    - name: "collectionId"
+      in: "path"
+      required: true
+      type: "string"
+    - name: "path"
+      in: "path"
+      required: true
+      type: "string"
+  /mydocs/new/collection/{title}:
+    put:
+      summary: "Create a new Collection"
+      parameters: []
+      responses:
+        201:
+          description: "The Collection was created."
+          schema:
+            required:
+            - "html"
+            type: "object"
+            properties:
+              html:
+                type: "string"
+                description: "An HTML snippet representing the new Collection in the\
+                  \ user interface."
+          headers:
+            NewId:
+              type: "integer"
+              description: "The ID of the new collection."
+              x-example: 37
+            Location:
+              type: "string"
+              description: "The URL of the created collection."
+              x-example: "https://docs.yourcompany.com/api/mydocs/collection/37"
+        400:
+          description: "Failed to create the new Collection for an unknown reason."
+    parameters:
+    - name: "title"
+      in: "path"
+      required: true
+      type: "string"
+  /mydocs/article/collection/{collectionId}/{path}:
+    get:
+      summary: "Get an article as HTML"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            required:
+            - "addedOn"
+            - "attachments"
+            - "content"
+            - "title"
+            - "type"
+            - "views"
+            type: "object"
+            properties:
+              content:
+                type: "string"
+              title:
+                type: "string"
+              addedOn:
+                type: "integer"
+                description: "Days since the item was added"
+              rating:
+                type: "number"
+              views:
+                type: "integer"
+              attachments:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Attachment"
+              allAttachments:
+                type: "string"
+                description: "URL to fetch all attachments"
+              allTopicAttachments:
+                type: "string"
+                description: "URL to fetch all topic attachments"
+              topicMeta:
+                type: "string"
+                description: "FIXME datatype not clear: Meta information per topic"
+              type:
+                type: "string"
+                enum:
+                - "HTML"
+                - "resource"
+                - "error"
+              html:
+                type: "string"
+                description: "HTML content if type is HTML"
+              resource:
+                type: "string"
+                description: "Resource URL if type is resource"
+    parameters:
+    - name: "collectionId"
+      in: "path"
+      required: true
+      type: "string"
+    - name: "path"
+      in: "path"
+      required: true
+      type: "string"
+  /mydocs/pdf/title:
+    post:
+      summary: "Get PDF title"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          required:
+          - "pdf"
+          properties:
+            pdf:
+              $ref: "#/definitions/FavPdf"
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            required:
+            - "hasManyBundles"
+            - "title"
+            type: "object"
+            properties:
+              title:
+                type: "string"
+                description: "The title of the PDF."
+              hasManyBundles:
+                type: "boolean"
+                description: "Indicates if this PDF has contents from several bundles."
+  /mydocs/pdf/:
+    post:
+      summary: "Generate a PDF document"
+      consumes: []
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/FavPdf"
+      responses:
+        200:
+          description: "Status 200"
+  /mydocs/move/{collectionId}/{pubNavNumber}/{newParent}/{newPrevious}/{requestHash}:
+    post:
+      summary: "Move a Fav item to another place in the tree"
+      description: "The request hash is a number from the database used to make sure\
+        \ that the request is based on current data. This is done by comparing the\
+        \ reqHash value in the request to the value in the database for that specific\
+        \ Fav item. If the two values don't match, the handler returns a HTTP status\
+        \ 400."
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            required:
+            - "newHash"
+            type: "object"
+            properties:
+              newHash:
+                type: "string"
+                description: "The new hash number as a string, prefixed by X."
+                example: "X54"
+    parameters:
+    - name: "collectionId"
+      in: "path"
+      required: true
+      type: "string"
+    - name: "pubNavNumber"
+      in: "path"
+      required: true
+      type: "string"
+    - name: "newParent"
+      in: "path"
+      required: true
+      type: "string"
+    - name: "newPrevious"
+      in: "path"
+      required: true
+      type: "string"
+    - name: "requestHash"
+      in: "path"
+      required: true
+      type: "string"
+  /mydocs/share/users:
+    get:
+      summary: "List users to send the invite to"
+      parameters:
+      - name: "q"
+        in: "query"
+        required: true
+        type: "string"
+        description: "Query term to filter users. Must be at least a certain number\
+          \ of characters long. The exact number depends on configuration."
+        x-example: "john"
+      responses:
+        200:
+          description: "A list of tuples containing (name, email) for each user."
+        400:
+          description: "This is returned if the query string is too short."
+  /mydocs/share/invite/cleanup/{cutoffDate}:
+    post:
+      summary: "FIXME not implemented"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+    parameters:
+    - name: "cutoffDate"
+      in: "path"
+      required: true
+      type: "string"
+  /mydocs/share/invite/{inviteId}:
+    delete:
+      summary: "Delete this invitation"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+    parameters:
+    - name: "inviteId"
+      in: "path"
+      required: true
+      type: "string"
+  /mydocs/share/collection/{collectionId}:
+    get:
+      summary: "Get shared Collections list in chunks of 50 items."
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+    delete:
+      summary: "Unsubscribe from a shared Collection"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+    parameters:
+    - name: "collectionId"
+      in: "path"
+      required: true
+      type: "string"
+  /mydocs/share/{sharedCollectionId}/topic/{pubNavNumber}:
+    get:
+      summary: "Get items from one level"
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            required:
+            - "deductCount"
+            - "html"
+            type: "object"
+            properties:
+              deductCount:
+                type: "integer"
+                description: "FIXME guess: Number of topics the user did not have\
+                  \ access to."
+              html:
+                type: "string"
+                description: "HTML snippet"
+    parameters:
+    - name: "sharedCollectionId"
+      in: "path"
+      required: true
+      type: "string"
+    - name: "pubNavNumber"
+      in: "path"
+      required: true
+      type: "string"
+  /mydocs/invite/accept/{inviteId}:
+    get:
+      summary: "Accept this invitation"
+      description: "This request will cause changes in the database. However, since\
+        \ it is shared as a link in an email, it has to be a GET request nonetheless."
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+    parameters:
+    - name: "inviteId"
+      in: "path"
+      required: true
+      type: "string"
+  /pdf/{jobtoken}/status:
+    get:
+      summary: "Check the status of a PDF generation job"
+      description: "Check the status of a PDF generation job. `{jobtoken}` is the\
+        \ token that was provided when the PDF generation job was initiated."
+      parameters: []
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            required:
+            - "status"
+            type: "object"
+            description: "The current status of the PDF generation job, and a download\
+              \ token if the job is complete."
+            properties:
+              status:
+                type: "string"
+                description: "The current status of the PDF generation job. Possible\
+                  \ values: `JobDone`, `JobFailed`, `JobInProgress`, `JobInQueue`,\
+                  \ `JobUnknown`"
+              download_token:
+                type: "string"
+                description: "A token that can be used to download the completed PDF.\
+                  \ Only provided if the status is `JobDone`. The download token expires\
+                  \ within a short time after it is issued and must be used immediately."
+    parameters:
+    - name: "jobtoken"
+      in: "path"
+      required: true
+      type: "string"
+  /pdf/{jobtoken}/download:
+    get:
+      summary: "Download a generated PDF"
+      description: "Download PDF content that has been generated in the background.\
+        \ Requires the job token that was provided when the generation of the PDF\
+        \ was initiated, and the download token that was provided when the status\
+        \ of the PDF generation job was reported as `PDFDone`."
+      produces:
+      - "application/pdf"
+      parameters:
+      - name: "download_token"
+        in: "query"
+        required: true
+        type: "string"
+        description: "The download token that was provided when the status of this\
+          \ PDF generation job was reported as `PDfDone`"
+        x-example: "https://mysite.example.com/api/pdf/jjjjjj/download?download_token=tttttt"
+      responses:
+        200:
+          description: "Status 200"
+          schema:
+            type: "object"
+            description: "The generated PDF, as a download."
+      security: []
+    parameters:
+    - name: "jobtoken"
+      in: "path"
+      required: true
+      type: "string"
 securityDefinitions:
   Zoomin Generated Keys:
     type: "apiKey"
@@ -1207,8 +1918,10 @@ definitions:
     type: "object"
     required:
     - "breadcrumbs_html"
+    - "bundle_title"
     - "dates"
     - "dislikes"
+    - "keywords"
     - "likes"
     - "title"
     - "topic_html"
@@ -1258,6 +1971,28 @@ definitions:
         type: "string"
         description: "Textual representation of the tree of labels which apply to\
           \ this topic"
+      keywords:
+        type: "array"
+        description: "Array of keywords for this topic"
+        items:
+          type: "string"
+      attachments:
+        type: "object"
+        description: "The files attached to this topic."
+        properties:
+          topic_attachments:
+            type: "array"
+            description: "Array of individual attachments."
+            items:
+              $ref: "#/definitions/BundleAttachment"
+          all_attachments:
+            type: "string"
+            description: "URL to download all attachments as a single zip file."
+            example: "https://docs.zoominsoftware.io/bundle/publication_name/alltopicattach/intro.html"
+      bundle_title:
+        type: "string"
+        description: "Title of bundle containing this topic"
+        example: "AI Suite 3.1 User Manual"
     description: "An object representing a topic in a bundle."
   User:
     type: "object"
@@ -1722,9 +2457,6 @@ definitions:
       name:
         type: "string"
         description: "Content role name"
-      description:
-        type: "string"
-        description: "Textual description of the content role"
       includedSubjects:
         type: "array"
         description: "The list of included subjects in this content role"
@@ -1734,20 +2466,28 @@ definitions:
   Article:
     type: "object"
     required:
+    - "article_id"
     - "dates"
     - "dislikes"
     - "html"
+    - "keywords"
     - "labels"
     - "likes"
     - "title"
     - "views"
     properties:
+      article_id:
+        type: "string"
+        description: "Id of this article"
+        example: "bd4ceac2"
       title:
         type: "string"
         description: "Title of this article"
+        example: "SME Article Title"
       html:
         type: "string"
         description: "HTML of this article"
+        example: "<p>First para.</p>\n<p>Second para.</p>"
       views:
         type: "integer"
         description: "Number of views of this article"
@@ -1777,10 +2517,17 @@ definitions:
         type: "string"
         description: "Textual representation of the tree of labels which apply to\
           \ this article"
+      keywords:
+        type: "array"
+        description: "Array of keywords for this article"
+        items:
+          type: "string"
+        example: "[\"server\",\"cluster\",\"prototype\"]"
       expiration_date:
         type: "string"
         format: "date"
-        description: "Expiration Date of this Article"
+        description: "Expiration date of this article"
+        example: "2019-05-22"
   VoteAction:
     type: "object"
     required:
@@ -1867,3 +2614,190 @@ definitions:
         items:
           type: "string"
     description: "Links shown in a category box"
+  Attachment:
+    type: "object"
+    required:
+    - "mimeType"
+    - "name"
+    - "url"
+    properties:
+      name:
+        type: "string"
+      mimeType:
+        type: "string"
+      url:
+        type: "string"
+  Collection:
+    type: "object"
+    properties:
+      topics:
+        type: "array"
+        items:
+          type: "string"
+      collection:
+        type: "object"
+        properties:
+          stateHash:
+            type: "number"
+          owner:
+            type: "number"
+          title:
+            type: "string"
+          isDefault:
+            type: "boolean"
+    example: "{\"topics\":[],\"collection\":{\"stateHash\":0,\"owner\":1,\"title\"\
+      :\"Default Collection\",\"isDefault\":false}}"
+  CollectionPatch:
+    type: "object"
+    required:
+    - "cpIsDefault"
+    - "cpNewName"
+    properties:
+      cpNewName:
+        type: "string"
+        description: "New name of the collection"
+      cpIsDefault:
+        type: "boolean"
+        description: "Is this the default?"
+      cpShareWith:
+        type: "array"
+        description: "Who to share this collection with"
+        items:
+          type: "string"
+      cpSortBy:
+        type: "string"
+        enum:
+        - "CSAlpha"
+        - "CSCount"
+      cpUnshare:
+        type: "boolean"
+        description: "Unshare this collection?"
+  CollectionReq:
+    type: "object"
+    required:
+    - "crFilter"
+    - "crHtmlOnly"
+    - "crItemsPerPage"
+    - "crPage"
+    - "crSortBy"
+    - "crWithCounts"
+    properties:
+      crWithCounts:
+        type: "boolean"
+      crFilter:
+        type: "string"
+      crPage:
+        type: "integer"
+      crItemsPerPage:
+        type: "integer"
+      crHtmlOnly:
+        type: "boolean"
+      crSortBy:
+        type: "string"
+        enum:
+        - "CSAlpha"
+        - "CSCount"
+  FavItem:
+    type: "object"
+  FavItemType:
+    type: "string"
+    enum:
+    - "FITTopic"
+    - "FITBundle"
+    - "FITHowto"
+  FavPdf:
+    type: "object"
+    required:
+    - "fpCollId"
+    - "fpHasMany"
+    - "fpTitle"
+    - "fpToC"
+    properties:
+      fpCollId:
+        type: "integer"
+        description: "523"
+      fpTitle:
+        type: "string"
+      fpToC:
+        type: "boolean"
+        description: "Include table of contents."
+      fpCustom:
+        type: "string"
+      fpHasMany:
+        type: "boolean"
+      fpTopics:
+        type: "array"
+        description: "FIXME type should be array of tuple"
+        items:
+          type: "object"
+    description: "A data type used in the request to generate a PDF."
+  FavTopic:
+    type: "object"
+    required:
+    - "topicId"
+    - "topicNumber"
+    - "topicTitle"
+    - "topicType"
+    properties:
+      topicParent:
+        type: "integer"
+      topicTitle:
+        type: "string"
+      topicId:
+        type: "integer"
+      topicNumber:
+        type: "integer"
+      topicPrevious:
+        type: "integer"
+      topicContent:
+        type: "string"
+      topicType:
+        $ref: "#/definitions/FavItemType"
+    example: "{\"topicParent\":null,\"topicTitle\":\"Sample Preface\",\"topicId\"\
+      :68,\"topicNumber\":37,\"topicPrevious\":null,\"topicContent\":\"bundle:test-prod/enus/taskbook/task_preface.html\"\
+      ,\"topicType\":\"FITTopic\"}"
+  InviteReq:
+    type: "object"
+    required:
+    - "irCollId"
+    - "irNote"
+    - "irUsers"
+    properties:
+      irCollId:
+        type: "integer"
+        description: "Collection ID"
+      irUsers:
+        type: "array"
+        description: "Users to invite"
+        items:
+          type: "string"
+      irNote:
+        type: "string"
+        description: "Note to recipients of invite"
+    description: "Request data for an invite"
+  NewTopic:
+    type: "object"
+    required:
+    - "newTopicContent"
+    - "newTopicParent"
+    - "newTopicType"
+    properties:
+      newTopicParent:
+        type: "integer"
+        description: "The parent of the new topic"
+      newTopicContent:
+        type: "array"
+        items:
+          type: "string"
+      newTopicType:
+        $ref: "#/definitions/FavItemType"
+  PdfTitleSuggest:
+    type: "object"
+    required:
+    - "hasManyBundles"
+    - "title"
+    properties:
+      title:
+        type: "string"
+      hasManyBundles:
+        type: "boolean"
