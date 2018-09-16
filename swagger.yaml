@@ -1919,11 +1919,13 @@ definitions:
     type: "object"
     required:
     - "breadcrumbs_html"
+    - "bundle_id"
     - "bundle_title"
     - "dates"
     - "dislikes"
     - "keywords"
     - "likes"
+    - "page_id"
     - "title"
     - "topic_html"
     - "views"
@@ -1994,6 +1996,17 @@ definitions:
         type: "string"
         description: "Title of bundle containing this topic"
         example: "AI Suite 3.1 User Manual"
+      page_id:
+        type: "string"
+        description: "Path within the publication to this topic. For 'html_topic'\
+          \ and 'nonhtml_file' types,  this represents the 'navpath' of the result.\
+          \ For 'contributed_article' results, this represents the 'articleId'."
+        example: "Content/Contracts/00_Contract_Life_Cycle_Management.htm"
+      bundle_id:
+        type: "string"
+        description: "Id for the publication to which this topic belongs. Only for\
+          \ ‘html_topic’ and ‘nonhtml_file’ types."
+        example: "publication_name"
     description: "An object representing a topic in a bundle."
   User:
     type: "object"
